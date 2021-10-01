@@ -1680,3 +1680,228 @@ std::ostream& operator<<(std::ostream& stream, Mat3x2F matrix)
 	return stream << "a11: " << matrix.a11 << " a12: " << matrix.a12 << " a13: " << matrix.a13 << std::endl
 		<< "a21: " << matrix.a21 << " a22: " << matrix.a22 << " a23: " << matrix.a23 << std::endl;
 }
+
+
+
+MatNI::MatNI() :
+    size(0),
+    values(nullptr)
+{
+}
+
+MatNI::MatNI(const MatNI& matrix) :
+    size(matrix.size)
+{
+    if(size == 0)
+    {
+        values = nullptr;
+        return;
+    }
+    
+    values = new int[size];
+    for(unsigned i = 0; i < size * size; i++)
+    {
+        this->values[i] = values[i];
+    }
+}
+
+MatNI::MatNI(unsigned size, int* values) :
+    size(size)
+{
+    if(size > UINT_MAX / size)
+    {
+        size = 0;
+    }
+    if(size == 0)
+    {
+        values = nullptr;
+        return;
+    }
+    
+    values = new int[size * size];
+    for(unsigned i = 0; i < size * size; i++)
+    {
+        this->values[i] = values[i];
+    }
+}
+
+unsigned MatNI::GetSize()
+{
+    return size;
+}
+
+int MatNI::GetValue(unsigned l, unsigned h)
+{
+    if(l >= size || h >= size)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Cell out of adges of matrix" << std::endl;
+        return 0;
+    }
+    return values[h * size + l];
+}
+
+int* MatNI::GetValuesArray()
+{
+    if(size == 0)
+    {
+        return nullptr;
+    }
+    
+    unsigned array_length = size * size;
+    int* return_values_array = new int[array_length];
+    
+    for(unsigned i = 0; i < array_length; i++)
+    {
+        return_values_array[i] = values[i];
+    }
+    
+    return return_values_array;
+}
+
+void MatNI::Set(unsigned size, int* values)
+{
+    if(this->size > 0)
+    {
+        delete[] values;
+    }
+    this->size = size;
+    if(size == 0)
+    {
+        values = nullptr;
+        return;
+    }
+    
+    unsigned values_count = size * size;
+    
+    values = new int[values_count];
+    
+    for(unsigned i = 0; i < values_count; i++)
+    {
+        this->values[i] = values[i];
+    }
+}
+
+void MatNI::SetValue(unsigned l, unsigned h, int value)
+{
+    if(l >= size || h >= size)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Cell out of adges of matrix" << std::endl;
+    }
+    
+    values[h * size + l] = value;
+}
+
+void MatNI::SetValues(int* values, bool* mask)
+{
+    if(size == 0)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Set values to null matrix" << std::endl;
+        return;
+    }
+    unsigned value_id = 0;
+    unsigned values_count = size * size;
+    
+    for(unsigned i = 0; i < values_count; i++)
+    {
+        if(mask[i])
+        {
+            this->values[i] = values[value_id];
+            value_id++;
+        }
+    }
+}
+
+MatNI MatNI::operator+(MatNI matrix)
+{
+    if(size != matrix.size || size == 0 || matrix.size == 0)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Matrixes are different or null" << std::endl;
+        return MatNI();
+    }
+    
+    MatNI return_matrix;
+    return_matrix.size = size;
+    
+    for(unsigned i = 0; i < size; i++)
+    {
+        return_matrix.values[i] = values[i] + matrix.values[i];
+    }
+    
+    return return_matrix;
+}
+
+MatNI MatNI::operator-(MatNI matrix)
+{
+    if(size != matrix.size || size == 0 || matrix.size == 0)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Matrixes are different or null" << std::endl;
+        return MatNI();
+    }
+    
+    MatNI return_matrix;
+    return_matrix.size = size;
+    
+    for(unsigned i = 0; i < size; i++)
+    {
+        return_matrix.values[i] = values[i] - matrix.values[i];
+    }
+    
+    return return_matrix;
+}
+
+bool MatNI::operator==(MatNI matrix)
+{
+    if(size == 0 || matrix.size == 0)
+    {
+        std::cout << "ERROR::MATRIX_N_INT::Matrix is null" << std::endl;
+        return false;
+    }
+    if(size != matrix.size)
+    {
+        return false;
+    }
+    
+    for(unsigned i = 0; i < size; i++)
+    {
+        if(matrix.values[i] != values[i])
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+MatNI::~MatNI()
+{
+    if(size > 0)
+    {
+        delete[] values;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

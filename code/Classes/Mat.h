@@ -3,6 +3,8 @@
 #include <iostream>
 #include <math.h>
 
+#include <limits.h>
+
 #include "../Types/AllTypes.h"
 #include "../Constants/AllConstants.h"
 
@@ -12,6 +14,7 @@ class Mat2F;
 class Mat2D;
 class Mat3x2F;
 class Mat3x2D;
+class MatNI;
 
 class Vec2D
 {
@@ -367,3 +370,53 @@ public:
 
 std::ostream& operator<<(std::ostream& stream, Mat3x2D vector);
 std::ostream& operator<<(std::ostream& stream, Mat3x2F vector);
+
+
+
+class MatNI
+{
+protected:
+    unsigned size;
+    int* values;
+public:
+    MatNI();
+    MatNI(const MatNI& matrix);
+    //Matrix get data from line to line.
+    MatNI(unsigned size, int* values);
+    
+    unsigned GetSize();
+    int GetValue(unsigned l, unsigned h);
+    //The function create a new block of memory and return pointer to it.
+    //Don't foget clear this block after use.
+    int* GetValuesArray();
+    void Set(unsigned size, int* values);
+    void SetValue(unsigned l, unsigned h, int value);
+    //If value in mask from indicated cell is true, the function set value in the matris to value from "values" and go to nex cell of "values".
+    //Count of true cells in "mask" need be eqular size of "values" array.
+    void SetValues(int* values, bool* mask);
+    
+    MatNI operator+(MatNI matrix);
+    MatNI operator-(MatNI matrix);
+    void operator=(MatNI matrix);
+    bool operator==(MatNI matrix);
+    
+    ~MatNI();
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

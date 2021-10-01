@@ -7,59 +7,61 @@ CLASS = Classes
 SUBCLASS = SubClasses
 NOT_MY = NotMy
 BIN = bin
+CLEAN_COMMAND = rm -rf $(BIN)/*.o *.o
 
 LIBS = -ldl -lm -lGL -lglfw -lepoxy -lstdc++
 
-BIN_FILES = main.o glad.o stb_image.o Buffer.o Line.o Mat.o Menu.o Shader.o Texture.o GraphRealisation.o MenuRealisation.o OpenGLRealisation.o
-
+BIN_FILES = $(BIN)/main.o $(BIN)/glad.o $(BIN)/stb_image.o $(BIN)/Buffer.o $(BIN)/Line.o $(BIN)/Mat.o $(BIN)/Menu.o $(BIN)/Shader.o $(BIN)/Texture.o $(BIN)/GraphRealisation.o $(BIN)/MenuRealisation.o $(BIN)/OpenGLRealisation.o
 
 all: $(MAKE)
 
+rebuild: clean all
+
 $(MAKE): $(BIN_FILES)
-	$(CC) $(BIN_FILES) $(LIBS) -o "$(BIN)/$(OUT)"
+	$(CC) $(BIN_FILES) $(LIBS) -o "$(OUT)"
 	
-main.o:
-	$(CC) -c "$(CODE)/main.cpp"
-	
-	
-glad.o:
-	$(CC) -c -ldl "$(CODE)/$(NOT_MY)/glad.c"
-	
-stb_image.o:
-	$(CC) -c "$(CODE)/$(NOT_MY)/stb_image.cpp"
+$(BIN)/main.o:
+	$(CC) -c "$(CODE)/main.cpp" -o "$(BIN)/main.o"
 	
 	
-Buffer.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Buffer.cpp"
+$(BIN)/glad.o:
+	$(CC) -c "$(CODE)/$(NOT_MY)/glad.c" -o "$(BIN)/glad.o"
 	
-Line.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Line.cpp"
-	
-Mat.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Mat.cpp"
-	
-Menu.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Menu.cpp"
-	
-Shader.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Shader.cpp"
-	
-Texture.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Texture.cpp"
+$(BIN)/stb_image.o:
+	$(CC) -c "$(CODE)/$(NOT_MY)/stb_image.cpp" -o "$(BIN)/stb_image.o"
 	
 	
-GraphRealisation.o:
-	$(CC) -c "$(CODE)/$(SUBCLASS)/GraphRealisation.cpp"
+$(BIN)/Buffer.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Buffer.cpp" -o "$(BIN)/Buffer.o"
 	
-MenuRealisation.o:
-	$(CC) -c "$(CODE)/$(SUBCLASS)/MenuRealisation.cpp"
+$(BIN)/Line.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Line.cpp" -o "$(BIN)/Line.o"
 	
-OpenGLRealisation.o:
-	$(CC) -c "$(CODE)/$(SUBCLASS)/OpenGLRealisation.cpp"
+$(BIN)/Mat.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Mat.cpp" -o "$(BIN)/Mat.o"
+	
+$(BIN)/Menu.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Menu.cpp" -o "$(BIN)/Menu.o"
+	
+$(BIN)/Shader.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Shader.cpp" -o "$(BIN)/Shader.o"
+	
+$(BIN)/Texture.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Texture.cpp" -o "$(BIN)/Texture.o"
+	
+	
+$(BIN)/GraphRealisation.o:
+	$(CC) -c "$(CODE)/$(SUBCLASS)/GraphRealisation.cpp" -o "$(BIN)/GraphRealisation.o"
+	
+$(BIN)/MenuRealisation.o:
+	$(CC) -c "$(CODE)/$(SUBCLASS)/MenuRealisation.cpp" -o "$(BIN)/MenuRealisation.o"
+	
+$(BIN)/OpenGLRealisation.o:
+	$(CC) -c "$(CODE)/$(SUBCLASS)/OpenGLRealisation.cpp" -o "$(BIN)/OpenGLRealisation.o"
 	
 	
 clean:
-	rm -rf *.o
+	$(CLEAN_COMMAND)
 
 
 

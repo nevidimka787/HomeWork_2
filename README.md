@@ -11,7 +11,7 @@ To buil the program:
 1. Open terminal in folder whis repository.
 2. Paste command "make".
 
-Binarum file is in bin directory. To start program past in terminal "bin/Task2"
+Binarum file is in bin directory. To start program past in terminal "./Task2"
 
 # Program description
 -- no deckription --
