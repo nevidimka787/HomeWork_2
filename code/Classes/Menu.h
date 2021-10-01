@@ -101,6 +101,7 @@ public:
 class Menu
 {
 protected:
+    id_t id;
 	Vec2F position;
 	Vec2F size;
 	Button* default_buttons;
@@ -110,6 +111,7 @@ public:
 	Menu();
 	Menu(const Menu& menu);
 	Menu(
+        EngineTypes::Menu::id_t id,
 		Vec2F* position, 
 		Vec2F* size,
 		Button* buttons = nullptr,
@@ -118,6 +120,7 @@ public:
 	void AddButton(EngineTypes::Menu::buttons_count_t button_number, Button* button);
 	void DeleteButton(EngineTypes::Menu::buttons_count_t button_number);
 	EngineTypes::Menu::buttons_count_t GetButtonsCount();
+    EngineTypes::Menu::id_t GetId();
 	Vec2F GetPosition();
 	Vec2F GetSize();
 	void HardRecalculate();

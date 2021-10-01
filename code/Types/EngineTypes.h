@@ -25,5 +25,6 @@ namespace EngineTypes
 	namespace Menu
 	{
 		typedef uint8_t buttons_count_t;
+        typedef uint8_t id_t;
 	}
 }

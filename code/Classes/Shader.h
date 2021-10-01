@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Math.h"
+#include "Color.h"
 
 #include "../Types/AllTypes.h"
 #include "../Constants/AllConstants.h"
@@ -28,6 +29,8 @@ public:
     void SetUniform(const std::string& name, float value) const;
     void SetUniform(const std::string& name, Beam beam) const;
     void SetUniform(const std::string& name, Beam* beam) const;
+    void SetUniform(const std::string& name, Color3F color) const;
+    void SetUniform(const std::string& name, Color3F* color) const;
     void SetUniform(const std::string& name, Line line) const;
     void SetUniform(const std::string& name, Line* line) const;
     void SetUniform(const std::string& name, Mat2F matrix) const;

@@ -369,7 +369,8 @@ Button::~Button()
 Menu::Menu() :
 	default_buttons(new Button[1]),
 	current_buttons(new Button[1]),
-	buttons_count(1)
+	buttons_count(1),
+	id(MENU_ID_NULL)
 {
 }
 
@@ -377,6 +378,7 @@ Menu::Menu(const Menu& menu):
 	default_buttons(new Button[menu.buttons_count]),
 	current_buttons(new Button[menu.buttons_count]),
 	buttons_count(menu.buttons_count),
+	id(menu.id),
 	position(menu.position),
 	size(menu.size)
 {
@@ -387,7 +389,8 @@ Menu::Menu(const Menu& menu):
 	HardRecalculate();
 }
 
-Menu::Menu(Vec2F* position, Vec2F* size, Button* buttons, EngineTypes::Menu::buttons_count_t buttons_count) :
+Menu::Menu(EngineTypes::Menu::id_t id, Vec2F* position, Vec2F* size, Button* buttons, EngineTypes::Menu::buttons_count_t buttons_count) :
+    id(id),
 	position(*position),
 	size(*size),
 	buttons_count(buttons_count)

@@ -363,7 +363,7 @@ point_t Graph::GetPointsCount()
     
     temp_point = 0;
     
-    for(point_t p = 0; p < max_point; p++)
+    for(point_t p = 0; p <= max_point; p++)
     {
         for(point_t c = 0; c < connections_count; c++)
         {
@@ -459,17 +459,27 @@ void Graph::operator=(Graph graph)
     }
 }
 
+Graph::~Graph()
+{
+    if(connections_count > 0)
+    {
+        delete[] connections;
+    }
+}
+
 std::ostream& operator<<(std::ostream& stream, Graph graph)
 {
     point_t connections_count = graph.GetConnectionsCount();
     if(connections_count != 0)
     {
         Connection* connections = graph.GetConnectionsArray();
-        for(point_t connection = 0; connection < connections_count; connection++)
+
+        for(point_t c = 0; c < connections_count; c++)
         {
-            stream << connections[connection] << std::endl;
+            stream  << connections[c] << std::endl;
         }
         delete[] connections;
+        std::cout << "";
     }
 }
 

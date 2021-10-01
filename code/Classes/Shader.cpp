@@ -156,6 +156,16 @@ void Shader::SetUniform(const std::string& name, Beam* beam) const
 	glUniform4f(glGetUniformLocation(id, name.c_str()), beam->point.x, beam->point.y, beam->vector.x, beam->vector.y);
 }
 
+void Shader::SetUniform(const std::string& name, Color3F color) const
+{
+    glUniform3f(glGetUniformLocation(id, name.c_str()), color.red, color.green, color.blue);
+}
+
+void Shader::SetUniform(const std::string& name, Color3F* color) const
+{
+    glUniform3f(glGetUniformLocation(id, name.c_str()), color->red, color->green, color->blue);
+}
+
 void Shader::SetUniform(const std::string& name, Line line) const
 {
 	glUniform4f(glGetUniformLocation(id, name.c_str()), line.point.x, line.point.y, line.vector.x, line.vector.y);

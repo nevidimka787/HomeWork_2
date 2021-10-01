@@ -11,7 +11,7 @@ CLEAN_COMMAND = rm -rf $(BIN)/*.o *.o
 
 LIBS = -ldl -lm -lGL -lglfw -lepoxy -lstdc++
 
-BIN_FILES = $(BIN)/main.o $(BIN)/glad.o $(BIN)/stb_image.o $(BIN)/Buffer.o $(BIN)/Line.o $(BIN)/Mat.o $(BIN)/Menu.o $(BIN)/Shader.o $(BIN)/Texture.o $(BIN)/GraphRealisation.o $(BIN)/MenuRealisation.o $(BIN)/OpenGLRealisation.o
+BIN_FILES = $(BIN)/main.o $(BIN)/glad.o $(BIN)/stb_image.o $(BIN)/Buffer.o $(BIN)/Color.o $(BIN)/Line.o $(BIN)/Mat.o $(BIN)/Menu.o $(BIN)/Shader.o $(BIN)/Texture.o $(BIN)/GraphRealisation.o $(BIN)/MenuRealisation.o $(BIN)/OpenGLRealisation.o
 
 all: $(MAKE)
 
@@ -33,6 +33,9 @@ $(BIN)/stb_image.o:
 	
 $(BIN)/Buffer.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Buffer.cpp" -o "$(BIN)/Buffer.o"
+	
+$(BIN)/Color.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Color.cpp" -o "$(BIN)/Color.o"
 	
 $(BIN)/Line.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Line.cpp" -o "$(BIN)/Line.o"
