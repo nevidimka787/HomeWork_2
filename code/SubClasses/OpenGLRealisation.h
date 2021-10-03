@@ -1,8 +1,9 @@
 #pragma once
 
-#include "MenuFunctions.h"
-
+#include "GraphRealisation.h"
 #include "../Classes/Engine.h"
+
+class OpenGL;
 
 class OpenGL
 {
@@ -12,40 +13,27 @@ protected:
 	GLint window_width;
 	//width / height
 	float window_scale;
-	Vec2D* cursore_current_position;
-	Vec2D* cursore_last_position;
-	Vec2D* cursore_press_position;
-	Vec2D* cursore_release_position;
+	Vec2D cursore_press_position;
+	Vec2F cursore_current_position;
+	Vec2F cursore_last_position;
+    bool flag_mouse_clk;
 public:
 
-	StaticBuffer grav_gen_buffer;
-	StaticBuffer mega_laser_buffer;
-
-	StaticBuffer button_buffer;
+    unsigned update_camera;
+    
+	StaticBuffer point_buffer;
+	StaticBuffer connection_buffer;
 
 	//buffers
 
-	//This values is set by defaultafter each click on the menu.
-	//Each frame this value will be decrease until it reached zero.
-	//Menu will be updating while the value is greater then zero.
-	uint8_t update_menu;
-	//If this flag is active then value of "update_menu" can be decrease.
-	bool flag_update_menu_can_change;
-	//The flag actives then menu is moving by cursore.
-	bool flag_move_menu;
-
-	int clear_frame;
-#define CLEAR_FRAME_PERIOD	30;
-
 	//The shader use for draw gravity generators.
-	Shader grav_gen_shader;
+	Shader point_shader;
 	//The shader use for draw mega lasers.
-	Shader mega_laser_shader;
-
-	//The shader use for draw buttons.
-	Shader button_shader;
+	Shader connection_shader;
 
 	//shaders
+    
+    Camera camera;
 
 	//textures
 
@@ -53,13 +41,6 @@ public:
 	Texture2D symbols_texture;
 
 	//textures
-    
-    //Menus
-    
-    Menu* current_active_menu;
-    Menu graph_set_menu;
-    
-    //Menus
 
 	OpenGL(
         int width,
@@ -72,17 +53,9 @@ public:
 
 	//Callback functions
 
-	void CallMenuFunction(Menu* menu, Vec2F* clk_pos, uint8_t clk_statuse);
 	void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-	void LimitMenuPosition(Menu* menu);
 	void ProcessInput(GLFWwindow* window);
     
-	//The function draw current menu.
-	void DrawCurrentMenu();
-	//The function draw indicated menu.
-	void DrawIndicatedMenu(Menu* menu);
-    
-    void DrawObject(Button* button, bool update_shader = false);
     
     void DrawFrame();
 
@@ -104,6 +77,39 @@ public:
 	void InitOpenGL();
 	void InitShaders();
 	void InitTextures();
+    
+    
+    void DrawObject(Point* point, bool update_shader = false);
+    void DrawObject(PhysicConnection* connection, bool update_shader = false);
+    void DrawObject(Graph* graph, bool update_shader = false);
 
     
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

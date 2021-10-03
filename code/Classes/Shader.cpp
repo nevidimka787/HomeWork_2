@@ -21,7 +21,7 @@ bool Shader::Initialisate(const char* vertex_file_name, const char* fragment_fil
 	FILE* vertex_file = nullptr;
 	FILE* fragment_file = nullptr;
 
-	if ((vertex_file = fopen(vertex_file_name, "r")) != nullptr)
+	if ((vertex_file = fopen(vertex_file_name, "r")) == nullptr)
 	{
 		std::cout << "ERROR::SHADER_CONSTRUCTOR::VERTEX::File not found." << std::endl
 			<< "File: " << vertex_file_name << std::endl << std::endl;
@@ -43,7 +43,7 @@ bool Shader::Initialisate(const char* vertex_file_name, const char* fragment_fil
 		fclose(vertex_file);
 	}
 
-	if ((fragment_file = fopen(fragment_file_name, "r")) != nullptr)
+	if ((fragment_file = fopen(fragment_file_name, "r")) == nullptr)
 	{
 		std::cout << "ERROR::SHADER_CONSTRUCTOR::FRAGMENT::File not found." << std::endl
 			<< "File: " << fragment_file_name << std::endl << std::endl;
@@ -133,7 +133,7 @@ void Shader::Use()
     glUseProgram(id);
 }
 
-void Shader::SetUniform(const std::string& name, EngineTypes::Button::text_t* text, uint16_t text_length) const
+void Shader::SetUniform(const std::string& name, int* text, int text_length) const
 {
     glUniform1iv(glGetUniformLocation(id, name.c_str()), text_length, (GLint*)text);
 }
@@ -146,16 +146,6 @@ void Shader::SetUniform(const std::string& name, float value) const
     glUniform1f(glGetUniformLocation(id, name.c_str()), value);
 }
 
-void Shader::SetUniform(const std::string& name, Beam beam) const
-{
-	glUniform4f(glGetUniformLocation(id, name.c_str()), beam.point.x, beam.point.y, beam.vector.x, beam.vector.y);
-}
-
-void Shader::SetUniform(const std::string& name, Beam* beam) const
-{
-	glUniform4f(glGetUniformLocation(id, name.c_str()), beam->point.x, beam->point.y, beam->vector.x, beam->vector.y);
-}
-
 void Shader::SetUniform(const std::string& name, Color3F color) const
 {
     glUniform3f(glGetUniformLocation(id, name.c_str()), color.red, color.green, color.blue);
@@ -164,16 +154,6 @@ void Shader::SetUniform(const std::string& name, Color3F color) const
 void Shader::SetUniform(const std::string& name, Color3F* color) const
 {
     glUniform3f(glGetUniformLocation(id, name.c_str()), color->red, color->green, color->blue);
-}
-
-void Shader::SetUniform(const std::string& name, Line line) const
-{
-	glUniform4f(glGetUniformLocation(id, name.c_str()), line.point.x, line.point.y, line.vector.x, line.vector.y);
-}
-
-void Shader::SetUniform(const std::string& name, Line* line) const
-{
-	glUniform4f(glGetUniformLocation(id, name.c_str()), line->point.x, line->point.y, line->vector.x, line->vector.y);
 }
 
 void Shader::SetUniform(const std::string& name, Mat2F matrix) const

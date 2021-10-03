@@ -18,25 +18,21 @@
 
 void LocalFramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
-OpenGL* main_graw;
+OpenGL* main_draw;
 
 int main()
 {
     Connection* connections = new Connection[CONNENTIONS_COUNT];
-    connections[0].Set(1, 2);
-    connections[1].Set(1, 3);
-    connections[2].Set(2, 3);
-    connections[3].Set(1, 1);
-    connections[4].Set(2, 1);
+    connections[0] = Connection(1, 2);
+    connections[1] = Connection(1, 3);
+    connections[2] = Connection(2, 3);
+    connections[3] = Connection(1, 1);
+    connections[4] = Connection(2, 1);
     Graph graph = Graph(connections, CONNENTIONS_COUNT);
-    delete[] connections;
-    std::cout << "Graph view:\n" << graph << std::endl
-        << "All points count: " << graph.GetPointsCount() << std::endl
-        << graph.GetConnectionsCount(Connection(1, 2)) << std::endl;
         
         
     GLFWwindow* window = nullptr;
-    main_graw = new OpenGL(
+    main_draw = new OpenGL(
         SCR_WIDTH,                      //width
         SCR_HEIGHT,                     //height
         "Graph visualisation",          //window name
@@ -46,10 +42,21 @@ int main()
         &window                         //pointer to window
     );
     
-    while(true);
+    
+    while(true)
+    {
+        main_draw->ProcessInput(window);
+        
+        main_draw->DrawFrame();
+        main_draw->DrawObject(&graph, true);
+        
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+        glfwSwapInterval(1);//vertical synchronisation
+    }
 }
 
 void LocalFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    main_graw->FramebufferSizeCallback(window, width, height);
+    main_draw->FramebufferSizeCallback(window, width, height);
 }

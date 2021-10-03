@@ -1,6 +1,8 @@
+#pragma once
+
 #include <iostream>
 
-#include "../Classes/Mat.h"
+#include "../Classes/Math.h"
 #include "../Types/AllTypes.h"
 
 using namespace GraphTypes;
@@ -8,6 +10,8 @@ using namespace GraphTypes;
 class Connection;
 class DirectConnection;
 class Graph;
+class PhysicConnection;
+class Point;
 
 class Connection
 {
@@ -27,8 +31,6 @@ public:
     point_t GetMaxPoint();
     point_t GetMinPoint();
     bool IsCollectPoint(point_t p);
-    void Set(Connection* connection);
-    void Set(point_t p1, point_t p2);
     Connection Swap();
     void SwapThis();
     
@@ -97,6 +99,55 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& stream, Graph graph);
+
+class Point
+{
+public:
+    float radius;
+    Vec2F position;
+    unsigned text_size;
+    point_t number;
+    
+    Point(const Point& point);
+    Point(
+        point_t number = POINT_DEFAULT_NUMBER,
+        Vec2F position = POINT_DEFAULT_POSITION,
+        float radius = POINT_DEFAULT_RADIUS,
+        unsigned text_size = POINT_DEFAULT_TEXT_SIZE);
+    
+    char* GetNumberAsTextC();
+    int* GetNumberAsTextI();
+    unsigned GetNumberTextLength();
+    
+    void operator=(Point point);
+    
+    ~Point();
+};
+
+class PhysicConnection
+{
+protected:
+    Vec2F* p1_p;//pointer to pisition of point
+    Vec2F* p2_p;//pointer to pisition of point
+    
+public:
+    float width;
+    float rounded;
+        
+    PhysicConnection(const PhysicConnection& connection);
+    PhysicConnection(
+        Point* p1,
+        Point* p2,
+        float width = CONNECTION_DEFAULT_WIDTH,
+        float rounded = CONNECTION_DEFAULT_ROUNDED);
+    Segment GetSegment();
+    void SetPosition(Point* p1, Point* p2);
+    
+    void operator=(PhysicConnection connection);
+    
+    ~PhysicConnection();
+};
+
 
 
 

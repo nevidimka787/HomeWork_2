@@ -11,7 +11,7 @@ CLEAN_COMMAND = rm -rf $(BIN)/*.o *.o
 
 LIBS = -ldl -lm -lGL -lglfw -lepoxy -lstdc++
 
-BIN_FILES = $(BIN)/main.o $(BIN)/glad.o $(BIN)/stb_image.o $(BIN)/Buffer.o $(BIN)/Color.o $(BIN)/Line.o $(BIN)/Mat.o $(BIN)/Menu.o $(BIN)/Shader.o $(BIN)/Texture.o $(BIN)/GraphRealisation.o $(BIN)/MenuRealisation.o $(BIN)/OpenGLRealisation.o
+BIN_FILES = $(BIN)/main.o $(BIN)/glad.o $(BIN)/stb_image.o $(BIN)/Buffer.o $(BIN)/Color.o $(BIN)/Camera.o $(BIN)/Line.o $(BIN)/Mat.o $(BIN)/Shader.o $(BIN)/Texture.o $(BIN)/GraphRealisation.o $(BIN)/OpenGLRealisation.o
 
 all: $(MAKE)
 
@@ -34,6 +34,9 @@ $(BIN)/stb_image.o:
 $(BIN)/Buffer.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Buffer.cpp" -o "$(BIN)/Buffer.o"
 	
+$(BIN)/Camera.o:
+	$(CC) -c "$(CODE)/$(CLASS)/Camera.cpp" -o "$(BIN)/Camera.o"
+	
 $(BIN)/Color.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Color.cpp" -o "$(BIN)/Color.o"
 	
@@ -42,9 +45,6 @@ $(BIN)/Line.o:
 	
 $(BIN)/Mat.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Mat.cpp" -o "$(BIN)/Mat.o"
-	
-$(BIN)/Menu.o:
-	$(CC) -c "$(CODE)/$(CLASS)/Menu.cpp" -o "$(BIN)/Menu.o"
 	
 $(BIN)/Shader.o:
 	$(CC) -c "$(CODE)/$(CLASS)/Shader.cpp" -o "$(BIN)/Shader.o"
@@ -55,9 +55,6 @@ $(BIN)/Texture.o:
 	
 $(BIN)/GraphRealisation.o:
 	$(CC) -c "$(CODE)/$(SUBCLASS)/GraphRealisation.cpp" -o "$(BIN)/GraphRealisation.o"
-	
-$(BIN)/MenuRealisation.o:
-	$(CC) -c "$(CODE)/$(SUBCLASS)/MenuRealisation.cpp" -o "$(BIN)/MenuRealisation.o"
 	
 $(BIN)/OpenGLRealisation.o:
 	$(CC) -c "$(CODE)/$(SUBCLASS)/OpenGLRealisation.cpp" -o "$(BIN)/OpenGLRealisation.o"

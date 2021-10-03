@@ -62,18 +62,6 @@ bool Connection::IsCollectPoint(point_t p)
     return p1 == p || p2 == p;
 }
 
-void Connection::Set(Connection* connection)
-{
-    p1 = connection->p1;
-    p2 = connection->p2;
-}
-
-void Connection::Set(point_t p1, point_t p2)
-{
-    this->p1 = p1;
-    this->p2 = p2;
-}
-
 Connection Connection::Swap()
 {
     return Connection(p2, p1);
@@ -123,12 +111,6 @@ DirectConnection::DirectConnection(const DirectConnection& connection) :
 DirectConnection::DirectConnection(point_t p1, point_t p2) :
     Connection(p1, p2)
 {
-}
-
-void DirectConnection::Set(DirectConnection* connection)
-{
-    p1 = connection->p1;
-    p2 = connection->p2;
 }
 
 DirectConnection DirectConnection::Swap()
@@ -482,6 +464,148 @@ std::ostream& operator<<(std::ostream& stream, Graph graph)
         std::cout << "";
     }
 }
+
+
+
+Point::Point(const Point& point) :
+    number(point.number),
+    position(point.position),
+    radius(point.radius),
+    text_size(point.text_size)
+{
+}
+
+Point::Point(point_t number, Vec2F position, float radius, unsigned text_size) :
+    number(number),
+    position(position),
+    radius(radius),
+    text_size(text_size)
+{
+}
+
+int* Point::GetNumberAsTextI()
+{
+    int* text;
+    if(number == 0)
+    {
+        text = new int[2];
+        text[0] = '0';
+        text[1] = '\0';
+    }
+    unsigned text_length = GetNumberTextLength();
+    
+    text = new int[text_length + 1];
+    point_t temp = number;
+    
+    for(unsigned i = text_length; i > 0; i--)
+    {
+        text[i - 1] = '0' + (temp % 10);
+        temp /= 10;
+    }
+    text[text_length] = '\0';
+    return text;
+}
+
+char* Point::GetNumberAsTextC()
+{
+    char* text;
+    if(number == 0)
+    {
+        text = new char[2];
+        text[0] = '0';
+        text[1] = '\0';
+    }
+    unsigned text_length = 0u;
+    
+    for(point_t n = number; n > 0; n /= 10)
+    {
+        text_length++;
+    }
+    
+    text = new char[text_length + 1];
+    point_t temp = number;
+    
+    for(unsigned i = text_length; i > 0; i--)
+    {
+        text[i - 1] = '0' + (temp % 10);
+        temp /= 10;
+    }
+    text[text_length] = '\0';
+}
+
+unsigned Point::GetNumberTextLength()
+{
+    if(number == 0)
+    {
+        return 1u;
+    }
+    unsigned l = 0u;
+    for(point_t n = number; n > 0; n /= 10)
+    {
+        l++;
+    }
+    return l;
+}
+
+void Point::operator=(Point point)
+{
+    number = point.number;
+    position = point.position;
+    radius = point.radius;
+    text_size = point.text_size;
+}
+
+Point::~Point()
+{
+}
+
+
+
+PhysicConnection::PhysicConnection(const PhysicConnection& connection) :
+    p1_p(connection.p1_p),
+    p2_p(connection.p2_p),
+    rounded(connection.rounded),
+    width(connection.width)
+{
+}
+
+PhysicConnection::PhysicConnection(Point* p1, Point* p2, float width, float rounded) :
+    p1_p(&p1->position),
+    p2_p(&p2->position),
+    rounded(rounded),
+    width(width)
+{    
+}
+
+Segment PhysicConnection::GetSegment()
+{
+    return Segment(p1_p, p2_p, true);
+}
+
+void PhysicConnection::SetPosition(Point* p1, Point* p2)
+{
+    p1_p = &p1->position;
+    p2_p = &p2->position;
+}
+
+void PhysicConnection::operator=(PhysicConnection connection)
+{
+    p1_p = connection.p1_p;
+    p2_p = connection.p2_p;
+    rounded = connection.rounded;
+    width = connection.width;
+}
+
+PhysicConnection::~PhysicConnection()
+{
+}
+
+
+
+
+
+
+
 
 
 
