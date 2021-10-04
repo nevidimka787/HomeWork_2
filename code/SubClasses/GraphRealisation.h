@@ -105,7 +105,7 @@ class Point
 public:
     float radius;
     Vec2F position;
-    unsigned text_size;
+    float text_size;
     point_t number;
     
     Point(const Point& point);
@@ -113,35 +113,41 @@ public:
         point_t number = POINT_DEFAULT_NUMBER,
         Vec2F position = POINT_DEFAULT_POSITION,
         float radius = POINT_DEFAULT_RADIUS,
-        unsigned text_size = POINT_DEFAULT_TEXT_SIZE);
+        float text_size = POINT_TEXT_SIZE_AUTO);
     
     char* GetNumberAsTextC();
     int* GetNumberAsTextI();
     unsigned GetNumberTextLength();
+    void Update();
     
     void operator=(Point point);
     
     ~Point();
 };
 
+//Broked line with three segments.
 class PhysicConnection
 {
 protected:
-    Vec2F* p1_p;//pointer to pisition of point
-    Vec2F* p2_p;//pointer to pisition of point
+    Vec2F p1;
+    Vec2F p2;
+    
+    //p1_p -> p1 -> p2 -> p2_p
     
 public:
-    float width;
-    float rounded;
-        
+    Vec2F* p1_p;//pointer to pisition of point
+    Vec2F* p2_p;//pointer to pisition of point
+    float center_parameter;
+    float shift;
+    
     PhysicConnection(const PhysicConnection& connection);
     PhysicConnection(
         Point* p1,
         Point* p2,
-        float width = CONNECTION_DEFAULT_WIDTH,
-        float rounded = CONNECTION_DEFAULT_ROUNDED);
-    Segment GetSegment();
-    void SetPosition(Point* p1, Point* p2);
+        float center_parameter = CONNECTION_DEFAULT_DISTANCE_TO_POINT,
+        float shift = CONNECTION_DEFAULT_SHIFT);
+    Segment GetSegment(ConnectionTypes::segment_id_t segment_id = CONNECTION_SEGMENT_ID_CENTER);
+    void Update();
     
     void operator=(PhysicConnection connection);
     

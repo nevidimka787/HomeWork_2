@@ -22,14 +22,14 @@ public:
     unsigned update_camera;
     
 	StaticBuffer point_buffer;
-	StaticBuffer connection_buffer;
+	StaticBuffer segment_buffer;
 
 	//buffers
 
 	//The shader use for draw gravity generators.
 	Shader point_shader;
 	//The shader use for draw mega lasers.
-	Shader connection_shader;
+	Shader segment_shader;
 
 	//shaders
     
@@ -82,7 +82,10 @@ public:
     void DrawObject(Point* point, bool update_shader = false);
     void DrawObject(PhysicConnection* connection, bool update_shader = false);
     void DrawObject(Graph* graph, bool update_shader = false);
-
+    void DrawObject(Segment segment, bool update_shader = false);
+    void DrawObject(Segment* segment, bool update_shader = false);
+    
+    ~OpenGL();
     
 };
 

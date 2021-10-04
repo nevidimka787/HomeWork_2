@@ -319,3 +319,22 @@ public:
 
 	~Segment();
 };
+
+
+std::ostream& operator<<(std::ostream& stream, Line line);
+std::ostream& operator<<(std::ostream& stream, Beam beam);
+std::ostream& operator<<(std::ostream& stream, Segment segment);
+
+
+
+
+
+
+
+
+
+
+
+
+
+

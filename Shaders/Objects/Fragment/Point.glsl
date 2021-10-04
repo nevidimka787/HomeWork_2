@@ -8,9 +8,9 @@ uniform sampler2D symbols_texture;
 
 uniform int text[32];
 uniform int text_length;
-uniform int text_size;
+uniform float text_size;
 
-#define TEXT_SIZE_100   100
+#define TEXT_SIZE_100   100.0f
 #define TEXTURE_CELL_SIZE (1.0f / 16.0f)
 
 #define TEXT_SCALE 0.6f
@@ -19,10 +19,13 @@ uniform int text_size;
 #define FALSE 0
 #define ERROR -1
 
+#define COLOR_WHILE vec3(1.0f)
+#define COLOR_BLACK vec3(0.0f)
+
 vec2 ConvertPosition(vec2 _pos, vec4 _from_cell, vec4 _to_cell);
 int PixelInSymbolFrame(vec2 _pix_pos, vec4 _frame);
 vec4 SymbolFrame(vec2 _frame, int _symbol_numer, int _text_length);
-vec2 TextFrame(int _text_length, int _text_size);
+vec2 TextFrame(int _text_length, float _text_size);
 vec2 TexturePosition(vec2 _pix_pos, vec4 cell, int _symbol);
 
 void main()
@@ -46,7 +49,7 @@ void main()
                     TexturePosition(pixel_position, cell, text[s])
                     ).z > 0.9f)
                 {
-                    fragment_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                    fragment_color = vec4(COLOR_BLACK, 1.0f);
                     return;
                 }
                 else
@@ -60,13 +63,14 @@ void main()
     
     if(length(pixel_position) < 0.95f)
     {
-        discard;
+        fragment_color = vec4(COLOR_WHILE, 1.0f);
+        return;
     }
     
-    fragment_color = vec4(0.0f ,0.0f, 0.0f, 1.0f);
+    fragment_color = vec4(COLOR_BLACK, 1.0f);
 }
 
-vec2 TextFrame(int _text_length, int _text_size)
+vec2 TextFrame(int _text_length, float _text_size)
 {
     float size = _text_size / TEXT_SIZE_100;
     

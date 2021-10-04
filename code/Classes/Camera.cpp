@@ -2,14 +2,12 @@
 
 Camera::Camera(const Camera& camera) :
     position(camera.position),
-    scale(camera.scale),
     size(camera.size)
 {
 }
 
-Camera::Camera(Vec2F position, float size, float scale) :
+Camera::Camera(Vec2F position, float size) :
     position(position),
-    scale(scale),
     size(size)
 {
 }

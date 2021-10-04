@@ -18,16 +18,8 @@ out vec2 pixel_position;
 void main()
 {
     pixel_position = aPos;
-
-    if(segment.xy != segment.zw)
-    {
-        matrix = SetBySegment(segment);
-    }
-    else
-    {
-        matrix = mat3(1.0f);
-    }
-    matrix *=
+    matrix =
+        SetBySegment(segment) *
         Transport(-camera_position) *
         Scale(vec2(1.0f / camera_size)) *
         Scale(vec2(1.0f, scale));
@@ -64,11 +56,11 @@ mat3 SetBySegment(vec4 _segment)
 {
     if(_segment.z > 0.0f)
     {
-        return Scale(vec2(length(_segment.zw))) * Rotate(atan(_segment.w / _segment.z)) * Transport(_segment.xy);
+        return Scale(vec2(length(_segment.zw), 1.0f)) * Rotate(atan(_segment.w / _segment.z)) * Transport(_segment.xy);
     }
     if(_segment.w > 0.0f)
     {
-        return Scale(vec2(length(_segment.zw))) * Rotate(atan(_segment.w / _segment.z) + radians(180.0f)) * Transport(_segment.xy);
+        return Scale(vec2(length(_segment.zw), 1.0f)) * Rotate(atan(_segment.w / _segment.z) + radians(180.0f)) * Transport(_segment.xy);
     }
-    return Scale(vec2(length(_segment.zw))) * Rotate(atan(_segment.w / _segment.z) - radians(180.0f)) * Transport(_segment.xy);
+    return Scale(vec2(length(_segment.zw), 1.0f)) * Rotate(atan(_segment.w / _segment.z) - radians(180.0f)) * Transport(_segment.xy);
 }

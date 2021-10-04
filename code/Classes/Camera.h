@@ -13,8 +13,7 @@ public:
     Camera(const Camera& camera);
     Camera(
         Vec2F position = CAMERA_DEFAULT_POSITION,
-        float size = CAMERA_DEFAULT_SIZE,
-        float scale = CAMERA_DEFAULT_SCALE);
+        float size = CAMERA_DEFAULT_SIZE);
     
     void Move(Vec2F move_vector);
     

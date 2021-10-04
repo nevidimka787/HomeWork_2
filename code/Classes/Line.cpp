@@ -1349,3 +1349,38 @@ Segment::operator Beam()
 Segment::~Segment()
 {
 }
+
+
+
+
+std::ostream& operator<<(std::ostream& stream, Line line)
+{
+    return stream << "P: " << line.point << " V: " << line.vector;
+}
+
+std::ostream& operator<<(std::ostream& stream, Beam beam)
+{
+    return stream << "P: " << beam.point << " V: " << beam.vector;
+}
+
+std::ostream& operator<<(std::ostream& stream, Segment segment)
+{
+    return stream << "P1: " << segment.point << " P2: " << segment.point + segment.vector;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -475,12 +475,18 @@ Point::Point(const Point& point) :
 {
 }
 
-Point::Point(point_t number, Vec2F position, float radius, unsigned text_size) :
+Point::Point(point_t number, Vec2F position, float radius, float text_size) :
     number(number),
     position(position),
-    radius(radius),
-    text_size(text_size)
+    radius(radius)
 {
+    if(text_size != text_size)
+    {
+        this->text_size = fminf(1.0f / (float)GetNumberTextLength() * POINT_NORMAL_TEXT_SIZE, POINT_MAX_TEXT_SIZE);
+        std::cout << "Text size: " << this->text_size << std::endl;
+        return;
+    }
+    this->text_size = text_size;
 }
 
 int* Point::GetNumberAsTextI()
@@ -547,6 +553,14 @@ unsigned Point::GetNumberTextLength()
     return l;
 }
 
+void Point::Update()
+{
+    if(text_size != text_size)
+    {
+        text_size = fminf(1.0f / (float)GetNumberTextLength() * POINT_NORMAL_TEXT_SIZE, POINT_MAX_TEXT_SIZE);
+    }
+}
+
 void Point::operator=(Point point)
 {
     number = point.number;
@@ -564,36 +578,51 @@ Point::~Point()
 PhysicConnection::PhysicConnection(const PhysicConnection& connection) :
     p1_p(connection.p1_p),
     p2_p(connection.p2_p),
-    rounded(connection.rounded),
-    width(connection.width)
+    p1(connection.p1),
+    p2(connection.p2),
+    center_parameter(connection.center_parameter),
+    shift(connection.shift)
 {
 }
 
-PhysicConnection::PhysicConnection(Point* p1, Point* p2, float width, float rounded) :
-    p1_p(&p1->position),
-    p2_p(&p2->position),
-    rounded(rounded),
-    width(width)
+PhysicConnection::PhysicConnection(Point* point_1, Point* point_2, float center_parameter, float shift) :
+    p1_p(&point_1->position),
+    p2_p(&point_2->position),
+    center_parameter(center_parameter),
+    shift(shift)
 {    
+    Update();
 }
 
-Segment PhysicConnection::GetSegment()
+Segment PhysicConnection::GetSegment(ConnectionTypes::segment_id_t segment_id)
 {
-    return Segment(p1_p, p2_p, true);
+    if(segment_id == CONNECTION_SEGMENT_ID_START)
+    {
+        return Segment(p1_p, &p1, true);
+    }
+    if(segment_id == CONNECTION_SEGMENT_ID_END)
+    {
+        return Segment(&p2, p2_p, true);
+    }
+    return Segment(p1, p2, true);
 }
 
-void PhysicConnection::SetPosition(Point* p1, Point* p2)
+void PhysicConnection::Update()
 {
-    p1_p = &p1->position;
-    p2_p = &p2->position;
+    Vec2F vec = (*p2_p - *p1_p).Normalize().Perpendicular() * shift;
+    Vec2F center = (*p2_p - *p1_p) / 2.0f;
+    p1 = *p1_p + center * (1.0f - center_parameter) + vec;
+    p2 = *p2_p - center * (1.0f - center_parameter) + vec;
 }
 
 void PhysicConnection::operator=(PhysicConnection connection)
 {
     p1_p = connection.p1_p;
     p2_p = connection.p2_p;
-    rounded = connection.rounded;
-    width = connection.width;
+    p1 = connection.p1;
+    p2 = connection.p2;
+    shift = connection.shift;
+    center_parameter = connection.center_parameter;
 }
 
 PhysicConnection::~PhysicConnection()

@@ -37,6 +37,7 @@ void OpenGL::ProcessInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
+        glfwTerminate();
         exit(0);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
@@ -48,6 +49,10 @@ void OpenGL::ProcessInput(GLFWwindow* window)
             cursore_current_position = Vec2F(
                 ((float)cursore_press_position.x / window_width - 0.5f) * 2.0f,
                 ((float)cursore_press_position.y / -window_height) * 2.0f / window_scale + 1.0f);
+            
+            camera.Move(cursore_last_position - cursore_current_position);
+            
+            cursore_last_position = cursore_current_position;
         }
         else
         {
@@ -56,18 +61,30 @@ void OpenGL::ProcessInput(GLFWwindow* window)
 
             glfwGetCursorPos(window, &cursore_press_position.x, &cursore_press_position.y);
 
-            cursore_current_position = Vec2F(
+            cursore_last_position = Vec2F(
                 ((float)cursore_press_position.x / window_width - 0.5f) * 2.0f,
                 ((float)cursore_press_position.y / -window_height) * 2.0f / window_scale + 1.0f);
-            
-            camera.Move(cursore_current_position - cursore_last_position);
-            
-            cursore_last_position = cursore_current_position;
         }
     }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && flag_mouse_clk)
     {
         flag_mouse_clk = false;
+    }
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3))
+    {
+        camera.size += 0.1f;
+        if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
+        {
+            camera.size = CAMERA_DEFAULT_SIZE;
+        }
+    }
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
+    {
+        camera.size -= 0.1f;
+        if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
+        {
+            camera.size = CAMERA_DEFAULT_SIZE;
+        }
     }
 }
 
@@ -108,7 +125,14 @@ void OpenGL::InitBuffers()
     points[5].Set(1.0f, -1.0f);
     
     point_buffer.Initialisate(points, 6);
-    connection_buffer.Initialisate(points, 6);
+    
+    points[0].Set(1.0f, 1.0f);
+    points[1].Set(0.0f, 1.0f);
+    points[2].Set(1.0f, -1.0f);
+    points[3].Set(0.0f, -1.0f);
+    points[4].Set(0.0f, 1.0f);
+    points[5].Set(1.0f, -1.0f);
+    segment_buffer.Initialisate(points, 6);
 }
 
 void OpenGL::InitGlad()
@@ -132,7 +156,7 @@ void OpenGL::InitOpenGL()
 void OpenGL::InitShaders()
 {
     point_shader.Initialisate("Shaders/Objects/Vertex/Point.glsl", "Shaders/Objects/Fragment/Point.glsl");
-    connection_shader.Initialisate("Shaders/Objects/Vertex/Connection.glsl", "Shaders/Objects/Fragment/Connection.glsl");
+    segment_shader.Initialisate("Shaders/Objects/Vertex/Segment.glsl", "Shaders/Objects/Fragment/Segment.glsl");
 }
 
 void OpenGL::InitTextures()
@@ -146,13 +170,6 @@ void OpenGL::DrawFrame()
 {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    Point p1 = Point(1, Vec2F(0.2f, 0.2f), 0.2f, 100);
-    Point p2 = Point(2, Vec2F(-0.2f, -0.2f), 0.2f, 100);
-    PhysicConnection c = PhysicConnection(&p1, &p2, 1.0f, 10.0f);
-    DrawObject(&p1, true);
-    DrawObject(&p2);
-    DrawObject(&c, true);
 }
 
 void OpenGL::DrawObject(Point* point, bool update_shader)
@@ -173,23 +190,43 @@ void OpenGL::DrawObject(Point* point, bool update_shader)
     point_shader.SetUniform("text", str, text_length);
     delete[] str;
     point_shader.SetUniform("text_length", text_length);
-    point_shader.SetUniform("text_size", (int)point->text_size);
+    point_shader.SetUniform("text_size", point->text_size);
     point_buffer.Draw();
 }
 
 void OpenGL::DrawObject(PhysicConnection* connection, bool update_shader)
 {
+    DrawObject(connection->GetSegment(CONNECTION_SEGMENT_ID_START), update_shader);
+    DrawObject(connection->GetSegment(CONNECTION_SEGMENT_ID_CENTER));
+    DrawObject(connection->GetSegment(CONNECTION_SEGMENT_ID_END));
+}
+
+void OpenGL::DrawObject(Segment segment, bool update_shader)
+{
     if(update_shader)
     {
-        connection_buffer.Use();
-        connection_shader.Use();
-        connection_shader.SetUniform("scale", window_scale);
-        connection_shader.SetUniform("camera_position", camera.position);
-        connection_shader.SetUniform("camera_size", camera.size);
+        segment_buffer.Use();
+        segment_shader.Use();
+        segment_shader.SetUniform("scale", window_scale);
+        segment_shader.SetUniform("camera_position", camera.position);
+        segment_shader.SetUniform("camera_size", camera.size);
     }
-    connection_shader.SetUniform("segment", connection->GetSegment());
-    connection_shader.SetUniform("rounded", connection->rounded);
-    connection_buffer.Draw();
+    segment_shader.SetUniform("segment", segment);
+    segment_buffer.Draw();
+}
+
+void OpenGL::DrawObject(Segment* segment, bool update_shader)
+{
+    if(update_shader)
+    {
+        segment_buffer.Use();
+        segment_shader.Use();
+        segment_shader.SetUniform("scale", window_scale);
+        segment_shader.SetUniform("camera_position", camera.position);
+        segment_shader.SetUniform("camera_size", camera.size);
+    }
+    segment_shader.SetUniform("segment", segment);
+    segment_buffer.Draw();
 }
 
 void OpenGL::DrawObject(Graph* graph, bool update_shader)
