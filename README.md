@@ -25,9 +25,9 @@ After that the program open the window and draw wisualisation of the graph.
 Wisualisation of graph can be moved by mouse and scaled by keys on the keyboard.
 
 Visualisation control:
-Moving mouse whis active left mouse button -> move graph
-1) Arrow up    -> scale up grahp
-2) Arrow down  -> scale down graph
+1) Moving mouse whis active left mouse button -> move graph
+2) Arrow up    -> scale up grahp
+3) Arrow down  -> scale down graph
 
 
 # Libraries
