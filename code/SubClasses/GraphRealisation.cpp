@@ -118,7 +118,7 @@ Connection::~Connection()
 
 std::ostream& operator<<(std::ostream& stream, Connection connection)
 {
-    stream << connection.GetPoint1() << " --- " << connection.GetPoint2();
+    stream << connection.GetPoint1() << " -- " << connection.GetPoint2();
 }
 
 
@@ -825,9 +825,9 @@ unsigned Graph::GetWidth()
     }
     if(w_max < width)
     {
-        return width;
+        return width + 1;
     }
-    return w_max;
+    return w_max + 1;
 }
 
 void Graph::operator=(Graph graph)

@@ -51,10 +51,6 @@ int main()
         //Print result.
         std::cout << "Graph is not tree." << std::endl;
     }
-    Graph ng = graph;
-    ng.Sort();
-    std::cout << ng << std::endl;
-    
     
     GLFWwindow* window = nullptr;
     
