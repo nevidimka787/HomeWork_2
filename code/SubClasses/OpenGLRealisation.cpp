@@ -222,6 +222,7 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
     GraphTypes::point_t current_point = c_arr[0].GetPoint1();
     GraphTypes::point_t last_point = current_point;
     unsigned level = 0;
+    bool next_delta = false;
     unsigned x = 0;
 
     points[0] = Point(
@@ -242,11 +243,8 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                 POINT_RADIUS);
             
             level++;
-            if(level > 3)
-            {
-                std::cout << "MAX" << std::endl;
-            }
             x = 0;
+            next_delta = false;
         }
         
         for(GraphTypes::point_t p = 0; p < points_count; p++)
@@ -257,8 +255,9 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                     p_arr[p],
                     Vec2F((float)x, -(float)(level + 1)) + position,
                     POINT_RADIUS);
-                if(last_con != c_arr[c])
+                if(last_con != c_arr[c] || last_con.GetPoint1() == last_con.GetPoint2() && !next_delta)
                 {
+                    next_delta = true;
                     x++;
                 }
                 break;
