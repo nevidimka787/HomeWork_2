@@ -66,6 +66,7 @@ int main()
         &window                         //pointer to window
     );
     
+    //Draw graph.
     while(true)
     {
         main_draw->ProcessInput(window);
