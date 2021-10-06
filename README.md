@@ -28,5 +28,10 @@ Visualisation control:
 Moving mouse whis active left mouse button -> move graph
 Arrow up    -> scale up grahp
 Arrow down  -> scale down graph
- 
 
+
+# Libraries
+The program use OpenGL libraries and use "glad" for work with OpenGL's functions.
+
+The program use stb_image for work with imajes (textures).
+https://github.com/nothings/stb/blob/master/stb_image.h
