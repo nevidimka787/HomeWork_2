@@ -7,8 +7,9 @@ class OpenGL;
 
 class OpenGL
 {
+private:
+    void DrawConnectedGraph(Graph graph, Vec2F position);
 protected:
-	uint16_t button_commands = 0x0000;
 	GLint window_height;
 	GLint window_width;
 	//width / height
@@ -16,10 +17,11 @@ protected:
 	Vec2D cursore_press_position;
 	Vec2F cursore_current_position;
 	Vec2F cursore_last_position;
-    bool flag_mouse_clk;
+    uint8_t flags_clk;
+    
 public:
 
-    unsigned update_camera;
+    unsigned update_frame;
     
 	StaticBuffer point_buffer;
 	StaticBuffer segment_buffer;
@@ -81,7 +83,7 @@ public:
     
     void DrawObject(Point* point, bool update_shader = false);
     void DrawObject(PhysicConnection* connection, bool update_shader = false);
-    void DrawObject(Graph* graph, bool update_shader = false);
+    void DrawObject(Graph graph, bool update_shader = false);
     void DrawObject(Segment segment, bool update_shader = false);
     void DrawObject(Segment* segment, bool update_shader = false);
     

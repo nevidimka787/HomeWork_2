@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h> //need install OpenGL libraries
 
 #include <iostream>
+#include <unistd.h> 
 
 #include "Types/AllTypes.h"
 #include "Constants/AllConstants.h"
@@ -33,49 +34,53 @@ unsigned GetLength(char* str, unsigned limit = 10);
 
 int main()
 {
+    //Init graph
     Graph graph;
+    
+    //Write data to graph.
     ReadGraph(&graph);
-    /*
-    if(graph->IsTree())
+    
+    //Check condiditon.
+    if(graph.IsTree())
     {
-        std::cout << "Graph is tree." << std::endl; 
+        //Print result.
+        std::cout << "Graph is tree." << std::endl;
     }
     else
     {
+        //Print result.
         std::cout << "Graph is not tree." << std::endl;
     }
-    */
+    
     
     GLFWwindow* window = nullptr;
+    
+    //Init OpenGL.
     main_draw = new OpenGL(
         SCR_WIDTH,                      //width
         SCR_HEIGHT,                     //height
         "Graph visualisation",          //window name
         nullptr,                        //monitor
         nullptr,                        //share
-        LocalFramebufferSizeCallback,   //callback function
+        LocalFramebufferSizeCallback,   //resize callback function
         &window                         //pointer to window
     );
-    
-    Connection* connections = graph.GetConnectionsArray();
-    
-    Point p1 = Point(connections[0].GetPoint1(), Vec2F(-0.5, 0.0f), 0.2);
-    Point p2 = Point(connections[0].GetPoint2(), Vec2F(0.5, 0.0f), 0.2);
-    PhysicConnection connection = PhysicConnection(&p1, &p2, 0.2f, 0.2f);
-    
-    delete[] connections;
     
     while(true)
     {
         main_draw->ProcessInput(window);
         
-        main_draw->DrawFrame();
+        if(main_draw->update_frame)
+        {
+            main_draw->DrawFrame();
+            main_draw->DrawObject(graph);
+            glfwSwapBuffers(window);
+        }
+        else
+        {
+            usleep(100);
+        }
         
-        main_draw->DrawObject(&connection, true);
-        main_draw->DrawObject(&p1, true);
-        main_draw->DrawObject(&p2);
-        
-        glfwSwapBuffers(window);
         glfwPollEvents();
         glfwSwapInterval(1);//vertical synchronisation
     }
@@ -208,7 +213,9 @@ void ReadGraph(Graph* graph)
         last = current;
     }
     
-    *graph = Graph(connections_array, connections_count);
+    *graph = Graph(
+        connections_array,  //array of connections
+        connections_count); //count of elements in the array
     
     free(str);
     free(connections_array);

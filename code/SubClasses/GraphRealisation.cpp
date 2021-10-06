@@ -87,6 +87,31 @@ bool Connection::operator==(Connection connection)
         connection.p1 == p2 && connection.p2 == p1;
 }
 
+bool Connection::operator!=(Connection connection)
+{
+    return
+        !(p1 == connection.p1 && p2 == connection.p2 ||
+        connection.p1 == p2 && connection.p2 == p1);
+}
+
+bool Connection::operator<(Connection connection)
+{
+    if(p1 == connection.p1)
+    {
+        return p2 < connection.p2;
+    }
+    return p1 < connection.p1;
+}
+
+bool Connection::operator>(Connection connection)
+{
+    if(p1 == connection.p1)
+    {
+        return p2 > connection.p2;
+    }
+    return p1 > connection.p1;
+}
+
 Connection::~Connection()
 {
 }
@@ -128,6 +153,12 @@ bool DirectConnection::operator==(DirectConnection connection)
 {
     return
         p1 == connection.p1 && p2 == connection.p2;
+}
+
+bool DirectConnection::operator!=(DirectConnection connection)
+{
+    return
+        !(p1 == connection.p1 && p2 == connection.p2);
 }
 
 
@@ -260,6 +291,100 @@ Graph::Graph(MatNI* matrix) :
     delete[] values;
 }
 
+bool Graph::Divide(Graph* return_graph)
+{
+    if(connections_count < 2)
+    {
+        return false;
+    }
+    
+    bool* flags_array = new bool[connections_count];
+    flags_array[0] = true;
+    for(point_t f = 1; f < connections_count; f++)
+    {
+        flags_array[f] = false;
+    }
+    
+    point_t next_con_c = 0;             //local connections count
+    Connection* next_con_a = nullptr;   //local connection array
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(!flags_array[c])
+        {
+            next_con_c = GetNextConnectionsCount(c);
+            if(next_con_c > 0)
+            {
+                next_con_a = GetNextConnectionsArray(c);
+                for(point_t nc = 0; nc < next_con_c; nc++)
+                {
+                    for(point_t tc = 0; tc < connections_count; tc++)
+                    {
+                        if(flags_array[tc] && next_con_a[nc] == connections[tc])
+                        {
+                            flags_array[c] = true;
+                            c = 1;              //return to start of the c cycle
+                            nc = next_con_c;    //go out o thef nc cycle
+                            break;              //go out of the tc cycle
+                        }
+                    }
+                }
+                delete[] next_con_a;
+            }
+        }
+    }
+    
+    next_con_a = (Connection*)malloc(sizeof(Connection));
+    next_con_c = 0;
+    
+    bool can_divide = false;
+    
+    for(point_t f = 0; f < connections_count; f++)
+    {
+        if(!flags_array[f])
+        {
+            can_divide = true;
+            break;
+        }
+    }
+    if(!can_divide)
+    {
+        return false;
+    }
+    
+    point_t new_con_c = 0;
+    
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(flags_array[c])
+        {
+            next_con_c++;
+            next_con_a = (Connection*)realloc(next_con_a, sizeof(Connection) * next_con_c);
+            next_con_a[next_con_c - 1] = connections[c];
+        }
+        else
+        {
+            new_con_c++;
+        }
+    }
+    
+    *return_graph = Graph(next_con_a, next_con_c);
+    free(next_con_a);
+    next_con_a = new Connection[new_con_c];
+    new_con_c = 0;
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(!flags_array[c])
+        {
+            next_con_a[new_con_c] = connections[c];
+            new_con_c++;
+        }
+    }
+    delete[] flags_array;
+    *this = Graph(next_con_a, new_con_c);
+    delete[] next_con_a;
+    return true;
+}
+
 point_t Graph::GetConnectionsCount()
 {
     return connections_count;
@@ -322,6 +447,70 @@ point_t Graph::GetConnectionsCount(point_t p)
         }
     }
     return count;
+}
+
+Connection* Graph::GetNextConnectionsArray(point_t connection_index)
+{
+    Connection* return_array = new Connection[GetNextConnectionsCount(connection_index)];
+    point_t next_con_c = 0;
+    for(point_t c  = 0; c < connections_count; c++)
+    {
+        if(c != connection_index && 
+            (
+            connections[c].GetPoint1() == connections[connection_index].GetPoint1() ||
+            connections[c].GetPoint2() == connections[connection_index].GetPoint1() ||
+            connections[c].GetPoint1() == connections[connection_index].GetPoint2() ||
+            connections[c].GetPoint2() == connections[connection_index].GetPoint2()
+            ))
+        {
+            return_array[next_con_c] = connections[c];
+            next_con_c++;
+        }
+    }
+    return return_array;
+}
+
+point_t Graph::GetNextConnectionsCount(point_t connection_index)
+{
+    point_t next_con_c = 0; //next connections count
+    for(point_t c  = 0; c < connections_count; c++)
+    {
+        if(c != connection_index && 
+            (
+            connections[c].GetPoint1() == connections[connection_index].GetPoint1() ||
+            connections[c].GetPoint2() == connections[connection_index].GetPoint1() ||
+            connections[c].GetPoint1() == connections[connection_index].GetPoint2() ||
+            connections[c].GetPoint2() == connections[connection_index].GetPoint2()
+            ))
+        {
+            next_con_c++;
+        }
+    }
+    return next_con_c;
+}
+
+point_t* Graph::GetPointsArray()
+{
+    if(connections_count == 0)
+    {
+        return nullptr;
+    }
+    
+    point_t max_point = GetMaxPoint();
+    unsigned points_count = GetPointsCount();
+    point_t* points_array = new point_t[points_count];
+    point_t current = 0;
+    for(point_t p = 0; p < max_point; p++)
+    {
+        if(IsCollectPoint(p))
+        {
+            points_array[current] = p;
+            current++;
+        }
+    }
+    points_array[points_count - 1] = max_point;
+    
+    return points_array;
 }
 
 point_t Graph::GetPointsCount()
@@ -403,6 +592,19 @@ Connection* Graph::GetConnectionsArray(point_t p)
     return return_connections_array;
 }
 
+point_t Graph::GetMaxPoint()
+{
+    point_t max_point = 0;
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(max_point < connections[c].GetMaxPoint())
+        {
+            max_point = connections[c].GetMaxPoint();
+        }
+    }
+    return max_point;
+}
+
 bool Graph::IsCollectPoint(point_t p)
 {
     if(connections_count == 0)
@@ -418,6 +620,229 @@ bool Graph::IsCollectPoint(point_t p)
        }
     }
     return false;
+}
+
+bool Graph::IsBasic()
+{
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(connections[c].GetPoint1() == connections[c].GetPoint2())
+        {
+            return false;
+        }
+    }
+    for(point_t c1 = 0; c1 < connections_count; c1++)
+    {
+        for(point_t c2 = c1 + 1; c2 < connections_count; c2++)
+        {
+            if(connections[c1] == connections[c2])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool Graph::IsConnected()
+{
+    point_t points_count = GetPointsCount();
+    if(points_count == 1)
+    {
+        return true;
+    }
+    if(connections_count == 0)
+    {
+        return false;
+    }
+    
+    point_t* points_array = GetPointsArray();
+    bool* active_array = new bool[points_count];
+    active_array[0] = true;
+    for(point_t p = 1; p < points_count; p++)
+    {
+        active_array[p] = false;
+    }
+    
+    point_t lock_con_c = 0;             //local connections count
+    Connection* lock_con_a = nullptr;   //local connection array
+    for(point_t p = 0; p < points_count; p++)
+    {
+        if(active_array[p])
+        {
+            lock_con_c = GetConnectionsCount(points_array[p]);
+            if(lock_con_c > 0)
+            {
+                lock_con_a = GetConnectionsArray(points_array[p]);
+                for(point_t c = 0; c < lock_con_c; c++)
+                {
+                    for(point_t np = 0; np < points_count; np++)
+                    {
+                        if(points_array[np] == lock_con_a[c].GetPoint1())
+                        {
+                            active_array[np] = true;
+                        }
+                        if(points_array[np] == lock_con_a[c].GetPoint2())
+                        {
+                            active_array[np] = true;
+                        }
+                    }
+                }
+                delete[] lock_con_a;
+            }
+            
+        }
+    }
+    
+    delete[] points_array;
+    
+    for(point_t p = 0; p < points_count; p++)
+    {
+        if(!active_array[p])
+        {
+            delete[] active_array;
+            return  false;
+        }
+    }
+    
+    delete[] active_array;
+    return true;
+}
+
+bool Graph::IsHaveCycle()
+{
+    point_t points_count = GetPointsCount();
+    if(points_count < 3 || connections_count < 3)
+    {
+        return false;
+    }
+    
+    Graph clone_graph = *this;
+    Graph new_graph;
+    
+    while(clone_graph.Divide(&new_graph))
+    {
+        if(new_graph.IsHaveCycleAsConnected())
+        {
+            return true;
+        }
+    }
+    return clone_graph.IsHaveCycleAsConnected();
+}
+
+bool Graph::IsHaveCycleAsConnected()
+{
+    point_t con_c = 0;
+    bool add_con = false;
+    Connection* con_a = (Connection*)malloc(sizeof(Connection));
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(connections[c].GetPoint1() != connections[c].GetPoint2())
+        {
+            if(con_c == 0)
+            {
+                con_c++;
+                con_a[0] = connections[c];
+            }
+            else
+            {
+                add_con = true;
+                for(point_t nc = 0; nc < c; nc++)
+                {
+                    if(connections[nc] == connections[c])
+                    {
+                        add_con = false;
+                        std::cout << connections[nc] << " == " << connections[c] << std::endl;
+                        break;
+                    }
+                }
+                if(add_con)
+                {
+                    con_c++;
+                    con_a = (Connection*)realloc(con_a, con_c * sizeof(Connection));
+                    con_a[con_c - 1] = connections[c];
+                }
+            }
+        }
+    }
+    free(con_a);
+    
+    return con_c >= GetPointsCount();
+}
+
+bool Graph::IsTree()
+{
+    return IsBasic() && IsConnected() && !IsHaveCycle();
+}
+
+void Graph::Sort()
+{
+    Connection temp;
+    for(point_t c = 0; c < connections_count; c++)
+    {
+        if(connections[c].GetPoint1() > connections[c].GetPoint2())
+        {
+            connections[c].SwapThis();
+        }
+    }
+    for(point_t c = 1; c < connections_count; c++)
+    {
+        if(connections[c - 1] > connections[c])
+        {
+            temp = connections[c - 1];
+            connections[c - 1] = connections[c];
+            connections[c] = temp;
+            c = 0;
+        }
+    }
+}
+
+unsigned Graph::GetHight()
+{
+    if(connections_count == 0)
+    {
+        return 0;
+    }
+    point_t last = connections[0].GetPoint1();
+    unsigned hight = 1;
+    for(point_t c = 1; c < connections_count; c++)
+    {
+        if(last != connections[c].GetPoint1())
+        {
+            last = connections[c].GetPoint1();
+            hight++;
+        }
+    }
+    return hight;
+}
+
+unsigned Graph::GetWidth()
+{
+    if(connections_count == 0)
+    {
+        return 0;
+    }
+    point_t w_max = 0;
+    point_t width = 0;
+    point_t last = connections[0].GetPoint1();
+    for(point_t c = 1; c < connections_count; c++)
+    {
+        if(last != connections[c].GetPoint1())
+        {
+            last = connections[c].GetPoint1();
+            if(w_max < width)
+            {
+                w_max = width;
+            }
+            width = 0;
+        }
+        width++;
+    }
+    if(w_max < width)
+    {
+        return width;
+    }
+    return w_max;
 }
 
 void Graph::operator=(Graph graph)
@@ -483,7 +908,6 @@ Point::Point(point_t number, Vec2F position, float radius, float text_size) :
     if(text_size != text_size)
     {
         this->text_size = fminf(1.0f / (float)GetNumberTextLength() * POINT_NORMAL_TEXT_SIZE, POINT_MAX_TEXT_SIZE);
-        std::cout << "Text size: " << this->text_size << std::endl;
         return;
     }
     this->text_size = text_size;
@@ -580,16 +1004,16 @@ PhysicConnection::PhysicConnection(const PhysicConnection& connection) :
     p2_p(connection.p2_p),
     p1(connection.p1),
     p2(connection.p2),
-    center_parameter(connection.center_parameter),
-    shift(connection.shift)
+    shift_x(connection.shift_x),
+    shift_y(connection.shift_y)
 {
 }
 
-PhysicConnection::PhysicConnection(Point* point_1, Point* point_2, float center_parameter, float shift) :
+PhysicConnection::PhysicConnection(Point* point_1, Point* point_2, float shift_x, float shift_y) :
     p1_p(&point_1->position),
     p2_p(&point_2->position),
-    center_parameter(center_parameter),
-    shift(shift)
+    shift_x(shift_x),
+    shift_y(shift_y)
 {    
     Update();
 }
@@ -604,15 +1028,25 @@ Segment PhysicConnection::GetSegment(ConnectionTypes::segment_id_t segment_id)
     {
         return Segment(&p2, p2_p, true);
     }
-    return Segment(p1, p2, true);
+    return Segment(&p1, &p2, true);
 }
 
 void PhysicConnection::Update()
 {
-    Vec2F vec = (*p2_p - *p1_p).Normalize().Perpendicular() * shift;
-    Vec2F center = (*p2_p - *p1_p) / 2.0f;
-    p1 = *p1_p + center * (1.0f - center_parameter) + vec;
-    p2 = *p2_p - center * (1.0f - center_parameter) + vec;
+    if(p1_p == nullptr || p2_p == nullptr)
+    {
+        return;
+    }
+    if(*p1_p == *p2_p)
+    {
+        p1 = *p1_p + Vec2F(-shift_y, shift_x);
+        p2 = *p1_p + Vec2F(shift_y, shift_x);
+        return;
+    }
+    Vec2F shift_y_vec = (*p2_p - *p1_p).Normalize().Perpendicular() * shift_y;
+    Vec2F center_vec = (*p2_p - *p1_p).Normalize() * shift_x;
+    p1 = *p1_p + center_vec + shift_y_vec;
+    p2 = *p2_p - center_vec + shift_y_vec;
 }
 
 void PhysicConnection::operator=(PhysicConnection connection)
@@ -621,8 +1055,9 @@ void PhysicConnection::operator=(PhysicConnection connection)
     p2_p = connection.p2_p;
     p1 = connection.p1;
     p2 = connection.p2;
-    shift = connection.shift;
-    center_parameter = connection.center_parameter;
+    shift_y = connection.shift_y;
+    shift_x = connection.shift_x;
+    Update();
 }
 
 PhysicConnection::~PhysicConnection()

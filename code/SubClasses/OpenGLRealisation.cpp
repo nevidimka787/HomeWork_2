@@ -5,7 +5,8 @@ OpenGL::OpenGL(int width, int height, const char* title, GLFWmonitor* monitor, G
     cursore_press_position(Vec2D()),
     cursore_last_position(Vec2F()),
     cursore_current_position(Vec2F()),
-    flag_mouse_clk(false)
+    flags_clk(OPEN_GL_REALISATION_KEY_NOTHIHG),
+    update_frame(OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT)
 {
     
     InitOpenGL();
@@ -16,12 +17,17 @@ OpenGL::OpenGL(int width, int height, const char* title, GLFWmonitor* monitor, G
     InitBuffers();
     InitShaders();
     InitTextures();
+    
+    //glEnable(GL_MULTISAMPLE);       //not work
+    //glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
 //Callback functions
 
 void OpenGL::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
+    update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
+    
     window_height = height;
     window_width = width;
     window_scale = (float)width / (float)height;
@@ -37,12 +43,13 @@ void OpenGL::ProcessInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
+        update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
         glfwTerminate();
         exit(0);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
-        if(flag_mouse_clk)
+        if(flags_clk & OPEN_GL_REALISATION_KEY_MOUSE_LEFT)
         {
             glfwGetCursorPos(window, &cursore_press_position.x, &cursore_press_position.y);
 
@@ -50,14 +57,13 @@ void OpenGL::ProcessInput(GLFWwindow* window)
                 ((float)cursore_press_position.x / window_width - 0.5f) * 2.0f,
                 ((float)cursore_press_position.y / -window_height) * 2.0f / window_scale + 1.0f);
             
-            camera.Move(cursore_last_position - cursore_current_position);
+            camera.Move((cursore_last_position - cursore_current_position) * camera.size);
             
             cursore_last_position = cursore_current_position;
         }
         else
         {
-            flag_mouse_clk = true;
-            update_camera = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
+            flags_clk |= OPEN_GL_REALISATION_KEY_MOUSE_LEFT;
 
             glfwGetCursorPos(window, &cursore_press_position.x, &cursore_press_position.y);
 
@@ -65,26 +71,45 @@ void OpenGL::ProcessInput(GLFWwindow* window)
                 ((float)cursore_press_position.x / window_width - 0.5f) * 2.0f,
                 ((float)cursore_press_position.y / -window_height) * 2.0f / window_scale + 1.0f);
         }
+        
+        update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
     }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && flag_mouse_clk)
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE &&
+        flags_clk & OPEN_GL_REALISATION_KEY_MOUSE_LEFT)
     {
-        flag_mouse_clk = false;
+        flags_clk &= OPEN_GL_REALISATION_KEY_FULL - OPEN_GL_REALISATION_KEY_MOUSE_LEFT;
     }
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3))
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS &&
+        !(flags_clk & OPEN_GL_REALISATION_KEY_UP))
     {
-        camera.size += 0.1f;
+        flags_clk |= OPEN_GL_REALISATION_KEY_UP;
+        camera.size *= 1.1f;
         if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
         {
             camera.size = CAMERA_DEFAULT_SIZE;
         }
+    update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
     }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
+    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE &&
+        flags_clk & OPEN_GL_REALISATION_KEY_UP)
     {
-        camera.size -= 0.1f;
+        flags_clk &= OPEN_GL_REALISATION_KEY_FULL - OPEN_GL_REALISATION_KEY_UP;
+    }
+    else if(glfwGetKey(window, GLFW_KEY_DOWN) &&
+        !(flags_clk & OPEN_GL_REALISATION_KEY_DOWN))
+    {
+        flags_clk |= OPEN_GL_REALISATION_KEY_DOWN;
+        camera.size /= 1.1f;
         if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
         {
             camera.size = CAMERA_DEFAULT_SIZE;
         }
+        update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
+    }
+    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE &&
+        flags_clk & OPEN_GL_REALISATION_KEY_DOWN)
+    {
+        flags_clk &= OPEN_GL_REALISATION_KEY_FULL - OPEN_GL_REALISATION_KEY_DOWN;
     }
 }
 
@@ -150,7 +175,6 @@ void OpenGL::InitOpenGL()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
 }
 
 void OpenGL::InitShaders()
@@ -168,8 +192,137 @@ void OpenGL::InitTextures()
 
 void OpenGL::DrawFrame()
 {
+    if(update_frame)
+    {
+        update_frame--;
+    }
+    
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
+{
+#define POINT_RADIUS    0.2f
+#define CONNECT_RADIUS  (POINT_RADIUS * 1.5f)
+    
+    //position.Set(0.0f, 0.0f);
+    
+    GraphTypes::point_t points_count = graph.GetPointsCount();
+    GraphTypes::point_t connections_count = graph.GetConnectionsCount();
+    if(points_count == 0 || connections_count == 0)
+    {
+        return;
+    }
+    Point* points = new Point[points_count];
+    
+    Connection* c_arr = graph.GetConnectionsArray();
+    GraphTypes::point_t* p_arr = graph.GetPointsArray();
+    
+    GraphTypes::point_t current_point = c_arr[0].GetPoint1();
+    GraphTypes::point_t last_point = current_point;
+    unsigned level = 0;
+    unsigned x = 0;
+
+    points[0] = Point(
+        p_arr[0],                       //point id
+        Vec2F(0.0f, 0.0f) + position,   //point position
+        POINT_RADIUS);                  //point radius
+    
+    Connection last_con = c_arr[0];
+    
+    for(GraphTypes::point_t c = 0; c < connections_count; c++)
+    {
+        if(last_point != c_arr[c].GetPoint1())
+        {
+            last_point = c_arr[c].GetPoint1();
+            points[level] = Point(
+                p_arr[level],
+                Vec2F(0.0f, -(float)level) + position,
+                POINT_RADIUS);
+            
+            level++;
+            if(level > 3)
+            {
+                std::cout << "MAX" << std::endl;
+            }
+            x = 0;
+        }
+        
+        for(GraphTypes::point_t p = 0; p < points_count; p++)
+        {
+            if(p_arr[p] == c_arr[c].GetPoint2())
+            {
+                points[p] = Point(
+                    p_arr[p],
+                    Vec2F((float)x, -(float)(level + 1)) + position,
+                    POINT_RADIUS);
+                if(last_con != c_arr[c])
+                {
+                    x++;
+                }
+                break;
+            }
+        }
+        
+        if(last_con != c_arr[c])
+        {
+            last_con = c_arr[c];
+            //x++;
+        }
+    }
+    
+    PhysicConnection connection = PhysicConnection(&points[0], &points[0], 0.0f, 0.0f);
+    unsigned shift = 0;
+    GraphTypes::point_t p1_id;
+    GraphTypes::point_t p2_id;
+    last_con = c_arr[0];
+    float dist;
+        
+    for(GraphTypes::point_t c = 0; c < connections_count; c++)
+    {
+        for(GraphTypes::point_t p = 0; p < points_count; p++)
+        {
+            if(c_arr[c].GetPoint1() == p_arr[p])
+            {
+                p1_id = p;
+            }
+            if(c_arr[c].GetPoint2() == p_arr[p])
+            {
+                p2_id = p;
+                break;
+            }
+        }
+        dist = points[p1_id].position.GetDistance(points[p2_id].position);
+        connection = PhysicConnection(
+            &points[p1_id],    //first point
+            &points[p2_id],    //second point
+            (p1_id != p2_id) ? dist / 2.0f : CONNECT_RADIUS + shift * POINT_RADIUS,                          //shift_x
+            (p1_id != p2_id) ? -((float)shift + (dist - 1.5f) + sqrtf((float)level) / 2.0f) * POINT_RADIUS * 1.05f : CONNECT_RADIUS + shift * CONNECT_RADIUS);   //shift_y
+        
+        if(last_con != c_arr[c])
+        {
+            last_con = c_arr[c];
+            shift = 0;
+        }
+        else
+        {
+            shift++;
+        }
+        
+        DrawObject(&connection, c == 0);
+    }
+    
+    
+    DrawObject(&points[0], true);
+    for(GraphTypes::point_t p = 1; p < points_count; p++)
+    {
+        DrawObject(&points[p]);
+    }
+    
+    delete[] points;
+    delete[] p_arr;
+    delete[] c_arr;
 }
 
 void OpenGL::DrawObject(Point* point, bool update_shader)
@@ -229,9 +382,27 @@ void OpenGL::DrawObject(Segment* segment, bool update_shader)
     segment_buffer.Draw();
 }
 
-void OpenGL::DrawObject(Graph* graph, bool update_shader)
+void OpenGL::DrawObject(Graph graph, bool update_shader)
 {
-    
+    Graph div_g;
+    graph.Sort();
+    Vec2F position = Vec2F(0.0f, 0.0f);
+    if(graph.Divide(&div_g))
+    {
+        DrawConnectedGraph(div_g, position);
+        position.x += div_g.GetWidth() + div_g.GetHight();
+    }
+    else
+    {
+        DrawConnectedGraph(graph, position);
+        return;
+    }
+    while(graph.Divide(&div_g))
+    {
+        DrawConnectedGraph(div_g, position);
+        position.x += div_g.GetWidth() + div_g.GetHight();
+    }
+    DrawConnectedGraph(graph, position);
 }
 
 //Multydraw functions
@@ -249,9 +420,6 @@ float OpenGL::GetScale()
 }
 
 //Get data functions
-
-
-
 
 
 

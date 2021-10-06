@@ -36,6 +36,9 @@ public:
     
     void operator=(Connection connection);
     bool operator==(Connection connection);
+    bool operator!=(Connection connection);
+    bool operator<(Connection connection);
+    bool operator>(Connection connection);
     
     ~Connection();
 };
@@ -52,6 +55,7 @@ public:
     
     void operator=(DirectConnection connection);
     bool operator==(DirectConnection connection);
+    bool operator!=(DirectConnection connection);
     
     ~DirectConnection();
 };
@@ -62,6 +66,11 @@ std::ostream& operator<<(std::ostream& stream, Connection connection);
 
 class Graph
 {
+private:
+    //Next connections -- connections are existing after "from_connection".
+    Connection* GetNextConnectionsArray(point_t connection_index);
+    point_t GetNextConnectionsCount(point_t connection_index);
+    bool IsHaveCycleAsConnected();
 protected:
     point_t connections_count;
     Connection* connections;
@@ -72,6 +81,7 @@ public:
     Graph(MatNI matrix);
     Graph(MatNI* matrix);
     
+    bool Divide(Graph* return_graph);
     //The function return count of all connections.
     point_t GetConnectionsCount();
     //The function return count of indicated connection.
@@ -80,6 +90,8 @@ public:
     point_t GetConnectionsCount(Connection* connection);
     //The function return count of conections that collect indicated point.
     point_t GetConnectionsCount(point_t p);
+    point_t GetMaxPoint();
+    point_t* GetPointsArray();
     point_t GetPointsCount();
     //The function create a new block of memory and return pointer to it.
     //The function can return nullptr.
@@ -92,8 +104,27 @@ public:
     Connection* GetConnectionsArray(point_t point_number);
     bool IsCollectPoint(point_t point_number);
     
+    //Properties
+    
+    bool IsBasic();
+    bool IsConnected();
+    bool IsHaveCycle();
+    bool IsTree();
+    
+    //Properties
+    
+    void Sort();
+    
+    //only sorted
+    
+    unsigned GetHight();
+    unsigned GetWidth();
+    
+    //only sorted
+    
     void operator=(Graph graph);
     bool operator==(Graph graph);
+    bool operator!=(Graph graph);
     
     ~Graph();
 };
@@ -137,8 +168,8 @@ protected:
 public:
     Vec2F* p1_p;//pointer to pisition of point
     Vec2F* p2_p;//pointer to pisition of point
-    float center_parameter;
-    float shift;
+    float shift_x;
+    float shift_y;
     
     PhysicConnection(const PhysicConnection& connection);
     PhysicConnection(
