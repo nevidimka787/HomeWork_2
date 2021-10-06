@@ -22,6 +22,8 @@ uniform float text_size;
 #define COLOR_WHILE vec3(1.0f)
 #define COLOR_BLACK vec3(0.0f)
 
+#define INSIDE_RADIUS   0.85f
+
 vec2 ConvertPosition(vec2 _pos, vec4 _from_cell, vec4 _to_cell);
 int PixelInSymbolFrame(vec2 _pix_pos, vec4 _frame);
 vec4 SymbolFrame(vec2 _frame, int _symbol_numer, int _text_length);
@@ -61,7 +63,7 @@ void main()
         }
     }
     
-    if(length(pixel_position) < 0.95f)
+    if(length(pixel_position) < INSIDE_RADIUS)
     {
         fragment_color = vec4(COLOR_WHILE, 1.0f);
         return;
