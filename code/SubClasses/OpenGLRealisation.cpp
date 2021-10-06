@@ -18,6 +18,8 @@ OpenGL::OpenGL(int width, int height, const char* title, GLFWmonitor* monitor, G
     InitShaders();
     InitTextures();
     
+    camera.size = 5.0f;
+    
     //glEnable(GL_MULTISAMPLE);       //not work
     //glfwWindowHint(GLFW_SAMPLES, 4);
 }
@@ -204,6 +206,8 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
 {
 #define POINT_RADIUS    0.2f
 #define CONNECT_RADIUS  (POINT_RADIUS * 1.5f)
+#define CELL_SIZE       1.0f
+#define CEL_SIZE_2      (CELL_SIZE / 2.0f)
     
     //position.Set(0.0f, 0.0f);
     
@@ -219,16 +223,19 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
     GraphTypes::point_t* p_arr = graph.GetPointsArray();
     
     GraphTypes::point_t last_point = c_arr[0].GetPoint1();
-    bool next_delta = false;
     unsigned ux = 0;
     unsigned uy = 0;
-    GraphTypes::point_t max_fp = 0;//max first point
+    bool* sets = new bool[points_count];
+    for(GraphTypes::point_t p = 0; p < points_count; p++)
+    {
+        sets[p] = false;
+    }
 
 
     points[0] = Point(
-        p_arr[0],                       //point id
-        Vec2F(0.0f, 0.0f) + position,   //point position
-        POINT_RADIUS);           //point radius
+        p_arr[0],                                   //point id
+        Vec2F(0.0f, 0.0f) + position * CELL_SIZE,   //point position
+        POINT_RADIUS);                              //point radius
     
     Connection last_con = c_arr[0];
     
@@ -249,26 +256,28 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                 {
                     points[p] = Point(
                         p_arr[p],
-                        Vec2F((float)ux, -(float)uy) + position,
+                        Vec2F((float)ux * CELL_SIZE, -(float)uy * CELL_SIZE) + position * CELL_SIZE,
                         POINT_RADIUS);
                     ux++;
-                    if(max_fp < p)
-                    {
-                        max_fp = p;
-                    }
+                    sets[p] = true;
                 }
             }
         }
     }
     uy++;
     ux = 0;
-    for(GraphTypes::point_t p = max_fp + 1; p < points_count; p++)
+    GraphTypes::point_t cp;
+    for(GraphTypes::point_t p = points_count; p > 0; p--)
     {
-        points[p] = Point(
-            p_arr[p],
-            Vec2F((float)ux, -(float)uy) + position,
-            POINT_RADIUS);
-        ux++;
+        cp = p - 1;
+        if(!sets[cp])
+        {
+            points[cp] = Point(
+                p_arr[cp],
+                Vec2F(-(float)ux * CELL_SIZE, -(float)uy * CELL_SIZE) + position * CELL_SIZE,
+                POINT_RADIUS);
+            ux++;
+        }
     }
     
     PhysicConnection connection = PhysicConnection(&points[0], &points[0], 0.0f, 0.0f);
@@ -302,11 +311,11 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
             &points[p1_id],    //first point
             &points[p2_id],    //second point
             (p1_id != p2_id) ? 
-                0.5f : 
-                CONNECT_RADIUS + shift * POINT_RADIUS,      //shift_x
+                fminf(dist  / 2.0f, 5.0f / 7.0f) * CELL_SIZE : 
+                CEL_SIZE_2 + shift * CELL_SIZE,      //shift_x
             (p1_id != p2_id) ? 
-                -((dist - 1.0f) / 2.0f + POINT_RADIUS * 1.05f) : 
-                CONNECT_RADIUS + shift * CONNECT_RADIUS);   //shift_y
+                -((dist - CELL_SIZE) * POINT_RADIUS * 19.0f / 5.0f) * CELL_SIZE : 
+                CEL_SIZE_2 + sqrt(shift * CELL_SIZE));   //shift_y
         
         if(last_con != c_arr[c])
         {

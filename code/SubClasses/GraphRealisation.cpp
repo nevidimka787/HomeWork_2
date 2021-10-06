@@ -645,67 +645,52 @@ bool Graph::IsBasic()
 }
 
 bool Graph::IsConnected()
-{
-    point_t points_count = GetPointsCount();
-    if(points_count == 1)
+{    
+    bool* flags_array = new bool[connections_count];
+    flags_array[0] = true;
+    for(point_t c = 1; c < connections_count; c++)
     {
-        return true;
-    }
-    if(connections_count == 0)
-    {
-        return false;
+        flags_array[c] = false;
     }
     
-    point_t* points_array = GetPointsArray();
-    bool* active_array = new bool[points_count];
-    active_array[0] = true;
-    for(point_t p = 1; p < points_count; p++)
+    point_t next_con_c = 0;             //local connections count
+    Connection* next_con_a = nullptr;   //local connection array
+    for(point_t c = 0; c < connections_count; c++)
     {
-        active_array[p] = false;
-    }
-    
-    point_t lock_con_c = 0;             //local connections count
-    Connection* lock_con_a = nullptr;   //local connection array
-    for(point_t p = 0; p < points_count; p++)
-    {
-        if(active_array[p])
+        if(!flags_array[c])
         {
-            lock_con_c = GetConnectionsCount(points_array[p]);
-            if(lock_con_c > 0)
+            next_con_c = GetNextConnectionsCount(c);
+            if(next_con_c > 0)
             {
-                lock_con_a = GetConnectionsArray(points_array[p]);
-                for(point_t c = 0; c < lock_con_c; c++)
+                next_con_a = GetNextConnectionsArray(c);
+                for(point_t nc = 0; nc < next_con_c; nc++)
                 {
-                    for(point_t np = 0; np < points_count; np++)
+                    for(point_t tc = 0; tc < connections_count; tc++)
                     {
-                        if(points_array[np] == lock_con_a[c].GetPoint1())
+                        if(flags_array[tc] && next_con_a[nc] == connections[tc])
                         {
-                            active_array[np] = true;
-                        }
-                        if(points_array[np] == lock_con_a[c].GetPoint2())
-                        {
-                            active_array[np] = true;
+                            flags_array[c] = true;
+                            c = 0;              //return to start of the c cycle
+                            nc = next_con_c;    //go out o thef nc cycle
+                            break;              //go out of the tc cycle
                         }
                     }
                 }
-                delete[] lock_con_a;
+                delete[] next_con_a;
             }
-            
         }
     }
     
-    delete[] points_array;
-    
-    for(point_t p = 0; p < points_count; p++)
+    for(point_t c = 0; c < connections_count; c++)
     {
-        if(!active_array[p])
+        if(!flags_array[c])
         {
-            delete[] active_array;
+            delete[] flags_array;
             return  false;
         }
     }
     
-    delete[] active_array;
+    delete[] flags_array;
     return true;
 }
 
@@ -1039,14 +1024,14 @@ void PhysicConnection::Update()
     }
     if(*p1_p == *p2_p)
     {
-        p1 = *p1_p + Vec2F(-shift_y, shift_x);
-        p2 = *p1_p + Vec2F(shift_y, shift_x);
+        p1 = *p1_p + Vec2F(-shift_y, shift_x).Rotate(CONNECTION_LOOP_ROTATE);
+        p2 = *p1_p + Vec2F(shift_y, shift_x).Rotate(CONNECTION_LOOP_ROTATE);
         return;
     }
-    Vec2F shift_y_vec = (*p2_p - *p1_p).Normalize().Perpendicular() * shift_y;
-    Vec2F center_vec = (*p2_p - *p1_p).Normalize() * shift_x;
-    p1 = *p1_p + center_vec + shift_y_vec;
-    p2 = *p2_p - center_vec + shift_y_vec;
+    Vec2F y_vec = (*p2_p - *p1_p).Normalize().Perpendicular() * shift_y;
+    Vec2F x_vec = (*p2_p - *p1_p).Normalize() * shift_x;
+    p1 = *p1_p + x_vec + y_vec * (1.0f + CONNECTION_ANGLE_TG);
+    p2 = *p2_p - x_vec + y_vec / (1.0f + CONNECTION_ANGLE_TG);
 }
 
 void PhysicConnection::operator=(PhysicConnection connection)
