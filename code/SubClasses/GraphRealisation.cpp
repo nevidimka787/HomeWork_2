@@ -322,7 +322,7 @@ bool Graph::Divide(Graph* return_graph)
                         if(flags_array[tc] && next_con_a[nc] == connections[tc])
                         {
                             flags_array[c] = true;
-                            c = 1;              //return to start of the c cycle
+                            c = 0;              //return to start of the c cycle
                             nc = next_con_c;    //go out o thef nc cycle
                             break;              //go out of the tc cycle
                         }

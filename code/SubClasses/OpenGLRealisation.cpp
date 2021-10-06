@@ -44,8 +44,7 @@ void OpenGL::ProcessInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         update_frame = OPEN_GL_REALISATION_FRAMES_AFTER_CALLBAC_COUNT;
-        glfwTerminate();
-        exit(0);
+        glfwSetWindowShouldClose(window, true);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
@@ -219,16 +218,17 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
     Connection* c_arr = graph.GetConnectionsArray();
     GraphTypes::point_t* p_arr = graph.GetPointsArray();
     
-    GraphTypes::point_t current_point = c_arr[0].GetPoint1();
-    GraphTypes::point_t last_point = current_point;
-    unsigned level = 0;
+    GraphTypes::point_t last_point = c_arr[0].GetPoint1();
     bool next_delta = false;
-    unsigned x = 0;
+    unsigned ux = 0;
+    unsigned uy = 0;
+    GraphTypes::point_t max_fp = 0;//max first point
+
 
     points[0] = Point(
         p_arr[0],                       //point id
         Vec2F(0.0f, 0.0f) + position,   //point position
-        POINT_RADIUS);                  //point radius
+        POINT_RADIUS);           //point radius
     
     Connection last_con = c_arr[0];
     
@@ -237,49 +237,51 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
         if(last_point != c_arr[c].GetPoint1())
         {
             last_point = c_arr[c].GetPoint1();
-            points[level] = Point(
-                p_arr[level],
-                Vec2F(0.0f, -(float)level) + position,
-                POINT_RADIUS);
-            
-            level++;
-            x = 0;
-            next_delta = false;
+            uy++;
+            ux = 0;
         }
-        
-        for(GraphTypes::point_t p = 0; p < points_count; p++)
-        {
-            if(p_arr[p] == c_arr[c].GetPoint2())
-            {
-                points[p] = Point(
-                    p_arr[p],
-                    Vec2F((float)x, -(float)(level + 1)) + position,
-                    POINT_RADIUS);
-                if(last_con != c_arr[c] || last_con.GetPoint1() == last_con.GetPoint2() && !next_delta)
-                {
-                    next_delta = true;
-                    x++;
-                }
-                break;
-            }
-        }
-        
         if(last_con != c_arr[c])
         {
             last_con = c_arr[c];
-            //x++;
+            for(GraphTypes::point_t p = 0; p < points_count; p++)
+            {
+                if(p_arr[p] == c_arr[c].GetPoint1())
+                {
+                    points[p] = Point(
+                        p_arr[p],
+                        Vec2F((float)ux, -(float)uy) + position,
+                        POINT_RADIUS);
+                    ux++;
+                    if(max_fp < p)
+                    {
+                        max_fp = p;
+                    }
+                }
+            }
         }
+    }
+    uy++;
+    ux = 0;
+    for(GraphTypes::point_t p = max_fp + 1; p < points_count; p++)
+    {
+        points[p] = Point(
+            p_arr[p],
+            Vec2F((float)ux, -(float)uy) + position,
+            POINT_RADIUS);
+        ux++;
     }
     
     PhysicConnection connection = PhysicConnection(&points[0], &points[0], 0.0f, 0.0f);
     unsigned shift = 0;
     GraphTypes::point_t p1_id;
     GraphTypes::point_t p2_id;
-    last_con = c_arr[0];
+    last_con = c_arr[connections_count - 1];
     float dist;
         
     for(GraphTypes::point_t c = 0; c < connections_count; c++)
     {
+        p1_id = points_count;
+        p2_id = points_count;
         for(GraphTypes::point_t p = 0; p < points_count; p++)
         {
             if(c_arr[c].GetPoint1() == p_arr[p])
@@ -289,6 +291,9 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
             if(c_arr[c].GetPoint2() == p_arr[p])
             {
                 p2_id = p;
+            }
+            if(p1_id != points_count && p2_id != points_count)
+            {
                 break;
             }
         }
@@ -296,8 +301,12 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
         connection = PhysicConnection(
             &points[p1_id],    //first point
             &points[p2_id],    //second point
-            (p1_id != p2_id) ? dist / 2.0f : CONNECT_RADIUS + shift * POINT_RADIUS,                          //shift_x
-            (p1_id != p2_id) ? -((float)shift + (dist - 1.5f) + sqrtf((float)level) / 2.0f) * POINT_RADIUS * 1.05f : CONNECT_RADIUS + shift * CONNECT_RADIUS);   //shift_y
+            (p1_id != p2_id) ? 
+                0.5f : 
+                CONNECT_RADIUS + shift * POINT_RADIUS,      //shift_x
+            (p1_id != p2_id) ? 
+                -((dist - 1.0f) / 2.0f + POINT_RADIUS * 1.05f) : 
+                CONNECT_RADIUS + shift * CONNECT_RADIUS);   //shift_y
         
         if(last_con != c_arr[c])
         {
@@ -311,10 +320,14 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
         
         DrawObject(&connection, c == 0);
     }
-    
-    
-    DrawObject(&points[0], true);
-    for(GraphTypes::point_t p = 1; p < points_count; p++)
+  
+    point_buffer.Use();
+    point_shader.Use();
+    symbols_texture.Use();
+    point_shader.SetUniform("scale", window_scale);
+    point_shader.SetUniform("camera_position", camera.position);
+    point_shader.SetUniform("camera_size", camera.size);
+    for(GraphTypes::point_t p = 0; p < points_count; p++)
     {
         DrawObject(&points[p]);
     }
@@ -420,7 +433,10 @@ float OpenGL::GetScale()
 
 //Get data functions
 
-
+OpenGL::~OpenGL()
+{
+    //glfwTerminate();
+}
 
 
 
