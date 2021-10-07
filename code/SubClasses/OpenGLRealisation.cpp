@@ -226,11 +226,11 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
     unsigned ux = 0;
     unsigned uy = 0;
     bool* sets = new bool[points_count];
-    for(GraphTypes::point_t p = 0; p < points_count; p++)
+    for(GraphTypes::point_t p = 1; p < points_count; p++)
     {
         sets[p] = false;
     }
-
+    sets[0] = true;
 
     points[0] = Point(
         p_arr[0],                                   //point id
@@ -258,7 +258,7 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                         p_arr[p],
                         Vec2F((float)ux * CELL_SIZE, -(float)uy * CELL_SIZE) + position * CELL_SIZE,
                         POINT_RADIUS);
-                    ux++;
+                    //ux++;
                     sets[p] = true;
                 }
             }
@@ -274,9 +274,9 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
         {
             points[cp] = Point(
                 p_arr[cp],
-                Vec2F(-(float)ux * CELL_SIZE, -(float)uy * CELL_SIZE) + position * CELL_SIZE,
+                Vec2F((-(float)ux - 1.0f) * CELL_SIZE, -(float)uy * CELL_SIZE) + position * CELL_SIZE,
                 POINT_RADIUS);
-            ux++;
+            uy++;
         }
     }
     
@@ -284,7 +284,7 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
     unsigned shift = 0;
     GraphTypes::point_t p1_id;
     GraphTypes::point_t p2_id;
-    last_con = c_arr[connections_count - 1];
+    last_con = c_arr[0];
     float dist;
         
     for(GraphTypes::point_t c = 0; c < connections_count; c++)
@@ -311,10 +311,10 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
             &points[p1_id],    //first point
             &points[p2_id],    //second point
             (p1_id != p2_id) ? 
-                fminf(dist  / 2.0f, 5.0f / 7.0f) * CELL_SIZE : 
+                fminf(dist  / 2.0f, 5.0f / 7.0f) / (float)(shift + 1) * CELL_SIZE : 
                 CEL_SIZE_2 + shift * CELL_SIZE,      //shift_x
             (p1_id != p2_id) ? 
-                -((dist - CELL_SIZE) * POINT_RADIUS * 19.0f / 5.0f) * CELL_SIZE : 
+                -((dist - CELL_SIZE -(float)shift) * POINT_RADIUS * 19.0f / 5.0f) * CELL_SIZE : 
                 CEL_SIZE_2 + sqrt(shift * CELL_SIZE));   //shift_y
         
         if(last_con != c_arr[c])
