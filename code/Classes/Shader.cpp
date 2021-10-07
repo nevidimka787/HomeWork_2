@@ -79,7 +79,7 @@ bool Shader::Initialisate(const char* vertex_file_name, const char* fragment_fil
 	{
 		glGetShaderInfoLog(vertex_shader, INFO_LOG_LENGTH, NULL, info_log);
 		std::cout << "ERROR::SHADER::VERTEX::Shader compilation failed." << std::endl
-			<< "File: " << fragment_file_name << std::endl
+			<< "File: " << vertex_file_name << std::endl
 			<< "Logs:\n" << info_log << std::endl
 			<< "-----------------------------------------------------------------------" << std::endl << std::endl;
 	}

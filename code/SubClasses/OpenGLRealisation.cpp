@@ -84,7 +84,10 @@ void OpenGL::ProcessInput(GLFWwindow* window)
         !(flags_clk & OPEN_GL_REALISATION_KEY_UP))
     {
         flags_clk |= OPEN_GL_REALISATION_KEY_UP;
-        camera.size *= 1.1f;
+        if(camera.size < OPEN_GL_REALISATION_CAMERA_MAX_EDGE_SIZE)
+        {
+            camera.size *= OPEN_GL_REALISATION_CAMERA_RESIZE_PARAMETER;
+        }
         if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
         {
             camera.size = CAMERA_DEFAULT_SIZE;
@@ -100,8 +103,14 @@ void OpenGL::ProcessInput(GLFWwindow* window)
         !(flags_clk & OPEN_GL_REALISATION_KEY_DOWN))
     {
         flags_clk |= OPEN_GL_REALISATION_KEY_DOWN;
-        camera.size /= 1.1f;
-        if(camera.size < CAMERA_DEFAULT_SIZE + 0.05f && camera.size > CAMERA_DEFAULT_SIZE - 0.05f)
+        if(camera.size > OPEN_GL_REALISATION_CAMERA_MIN_EDGE_SIZE)
+        {
+            camera.size /= OPEN_GL_REALISATION_CAMERA_RESIZE_PARAMETER;
+        }
+        if(camera.size < CAMERA_DEFAULT_SIZE * 
+                (1.0f + (OPEN_GL_REALISATION_CAMERA_RESIZE_PARAMETER - 1.0f) / 2.0f) &&
+            camera.size > CAMERA_DEFAULT_SIZE * 
+                (1.0f - (OPEN_GL_REALISATION_CAMERA_RESIZE_PARAMETER - 1.0f) / 2.0f))
         {
             camera.size = CAMERA_DEFAULT_SIZE;
         }

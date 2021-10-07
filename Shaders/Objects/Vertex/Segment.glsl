@@ -7,6 +7,9 @@ uniform float scale;
 uniform vec2 camera_position;
 uniform float camera_size;
 
+#define CAMERA_MAX_SIZE 5.0f
+#define CAMERA_MIN_SIZE 0.2f
+
 mat3 Rotate(float angel);
 mat3 Transport(vec2 vector);
 mat3 Scale(vec2 vector);
@@ -19,6 +22,7 @@ void main()
 {
     pixel_position = aPos;
     matrix =
+        Scale(vec2(1.0f, camera_size / max(CAMERA_MIN_SIZE, min(camera_size, CAMERA_MAX_SIZE)))) *
         SetBySegment(segment) *
         Transport(-camera_position) *
         Scale(vec2(1.0f / camera_size)) *

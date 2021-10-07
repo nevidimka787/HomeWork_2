@@ -14,12 +14,16 @@ mat3 Scale(vec2 vector);
 
 mat3 matrix;
 
+#define CAMERA_MAX_SIZE 8.0f
+#define CAMERA_MIN_SIZE 0.5f
+
 out vec2 pixel_position;
 void main()
 {
     pixel_position = aPos;
 
     matrix = 
+        Scale(vec2(camera_size / max(CAMERA_MIN_SIZE, min(camera_size, CAMERA_MAX_SIZE)))) *
         Scale(vec2(radius)) * 
         Transport(position) * 
         Transport(-camera_position) *

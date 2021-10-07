@@ -22,7 +22,7 @@ uniform float text_size;
 #define COLOR_WHILE vec3(1.0f)
 #define COLOR_BLACK vec3(0.0f)
 
-#define INSIDE_RADIUS   0.85f
+#define INSIDE_RADIUS   0.95f
 
 vec2 ConvertPosition(vec2 _pos, vec4 _from_cell, vec4 _to_cell);
 int PixelInSymbolFrame(vec2 _pix_pos, vec4 _frame);

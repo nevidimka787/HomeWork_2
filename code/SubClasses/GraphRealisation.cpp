@@ -495,22 +495,62 @@ point_t* Graph::GetPointsArray()
     {
         return nullptr;
     }
+#define ADD_N   0x00    //0000 0000
+#define ADD_1   0x01    //0000 0001
+#define ADD_2   0x02    //0000 0010
+#define ADD_F   0xFF    //1111 1111
     
-    point_t max_point = GetMaxPoint();
-    unsigned points_count = GetPointsCount();
-    point_t* points_array = new point_t[points_count];
-    point_t current = 0;
-    for(point_t p = 0; p < max_point; p++)
+    uint8_t add = ADD_N;
+    unsigned points_count = 1;
+    point_t* points_array = (point_t*)malloc(sizeof(point_t));
+    points_array[0] = connections[0].GetPoint1();
+    if(points_array[0] != connections[0].GetPoint2())
     {
-        if(IsCollectPoint(p))
+        points_array = (point_t*)realloc(points_array, sizeof(point_t) * 2lu);
+        points_array[1] = connections[0].GetPoint2();
+        points_count++;
+    }
+    point_t current = 0;
+    for(point_t c = 1; c < connections_count; c++)
+    {
+        add = ADD_1 | ADD_2;
+        for(point_t p = 0; p < points_count; p++)
         {
-            points_array[current] = p;
-            current++;
+            if(points_array[p] == connections[c].GetPoint1())
+            {
+                add &= ADD_F - ADD_1;
+            }
+            if(points_array[p] == connections[c].GetPoint2())
+            {
+                add &= ADD_F - ADD_2;
+            }
+            if(!add)
+            {
+                break;
+            }
+        }
+        if(add & ADD_1)
+        {
+            points_count++;
+            points_array = (point_t*)realloc(points_array, sizeof(point_t) * points_count);
+            points_array[points_count - 1u] = connections[c].GetPoint1();
+        }
+        if(add & ADD_2)
+        {
+            points_count++;
+            points_array = (point_t*)realloc(points_array, sizeof(point_t) * points_count);
+            points_array[points_count - 1u] = connections[c].GetPoint2();
         }
     }
-    points_array[points_count - 1] = max_point;
     
-    return points_array;
+    point_t* r_arr = new point_t[points_count];
+    for(point_t p = 0; p < points_count; p++)
+    {
+        r_arr[p] = points_array[p];
+    }
+    free(points_array);
+    
+    return r_arr;
 }
 
 point_t Graph::GetPointsCount()
@@ -520,33 +560,52 @@ point_t Graph::GetPointsCount()
         return 0;
     }
     
-    point_t max_point = 0;
-    point_t temp_point;
-    
-    for(point_t c = 0; c < connections_count; c++)
+    uint8_t add = ADD_N;
+    unsigned points_count = 1;
+    point_t* points_array = (point_t*)malloc(sizeof(point_t));
+    points_array[0] = connections[0].GetPoint1();
+    if(points_array[0] != connections[0].GetPoint2())
     {
-        temp_point = connections[c].GetMaxPoint();
-        if(max_point < temp_point)
-        {
-            max_point = temp_point;
-        }
+        points_array = (point_t*)realloc(points_array, sizeof(point_t) * 2lu);
+        points_array[1] = connections[0].GetPoint2();
+        points_count++;
     }
-    
-    temp_point = 0;
-    
-    for(point_t p = 0; p <= max_point; p++)
+    point_t current = 0;
+    for(point_t c = 1; c < connections_count; c++)
     {
-        for(point_t c = 0; c < connections_count; c++)
+        add = ADD_1 | ADD_2;
+        for(point_t p = 0; p < points_count; p++)
         {
-            if(connections[c].IsCollectPoint(p))
+            if(points_array[p] == connections[c].GetPoint1())
             {
-                temp_point++;
+                add &= ADD_F - ADD_1;
+            }
+            if(points_array[p] == connections[c].GetPoint2())
+            {
+                add &= ADD_F - ADD_2;
+            }
+            if(!add)
+            {
                 break;
             }
         }
+        if(add & ADD_1)
+        {
+            points_count++;
+            points_array = (point_t*)realloc(points_array, sizeof(point_t) * points_count);
+            points_array[points_count - 1u] = connections[c].GetPoint1();
+        }
+        if(add & ADD_2)
+        {
+            points_count++;
+            points_array = (point_t*)realloc(points_array, sizeof(point_t) * points_count);
+            points_array[points_count - 1u] = connections[c].GetPoint2();
+        }
     }
     
-    return temp_point;
+    free(points_array);
+    
+    return points_count;
 }
 
 Connection* Graph::GetConnectionsArray()
