@@ -306,6 +306,24 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                 break;
             }
         }
+        
+        if(last_con != c_arr[c])
+        {
+            last_con = c_arr[c];
+            shift = 0;
+        }
+        else if(c > 0)
+        {
+            if(shift == 0)
+            {
+                shift = 2;
+            }
+            else
+            {
+                shift++;
+            }
+        }
+        
         dist = points[p1_id].position.GetDistance(points[p2_id].position);
         connection = PhysicConnection(
             &points[p1_id],    //first point
@@ -314,18 +332,8 @@ void OpenGL::DrawConnectedGraph(Graph graph, Vec2F position)
                 fminf(dist  / 2.0f, 5.0f / 7.0f) / (float)(shift + 1) * CELL_SIZE : 
                 CEL_SIZE_2 + shift * CELL_SIZE,      //shift_x
             (p1_id != p2_id) ? 
-                -((dist - CELL_SIZE -(float)shift) * POINT_RADIUS * 19.0f / 5.0f) * CELL_SIZE : 
+                -((dist - CELL_SIZE - (float)shift) * POINT_RADIUS * 19.0f / 5.0f) * CELL_SIZE : 
                 CEL_SIZE_2 + sqrt(shift * CELL_SIZE));   //shift_y
-        
-        if(last_con != c_arr[c])
-        {
-            last_con = c_arr[c];
-            shift = 0;
-        }
-        else
-        {
-            shift++;
-        }
         
         DrawObject(&connection, c == 0);
     }
