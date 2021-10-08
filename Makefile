@@ -1,5 +1,5 @@
 CC = gcc
-OUT = Task2
+OUT = Task2.elf
 MAKE = Task2
 
 CODE = code
